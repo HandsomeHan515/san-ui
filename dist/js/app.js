@@ -12798,15 +12798,202 @@ module.exports = g;
 
 var san = __webpack_require__(/*! san */ "./node_modules/san/dist/san.dev.js");
 
+var Link = __webpack_require__(/*! san-router */ "./node_modules/san-router/dist/san-router.source.js").Link;
+
 module.exports = san.defineComponent({
-  template: "\n        <div class='hello'>\n            {{text}}\n            <button on-click='handleClick'>\u6309\u94AE</button>\n        </div>\n    ",
+  template: "\n        <div class='hello'>\n            {{text}}\n            <button on-click='handleClick'>\u6309\u94AE</button>\n            <b-link to='/year'>\u5E74\u5EA6</b-link>\n            <b-link to='/month'>\u6708\u4EFD</b-link>\n            <b-link to='/date'>\u65E5\u5386</b-link>\n        </div>\n    ",
   initData: function initData() {
     return {
       text: 'hello world'
     };
   },
+  components: {
+    'b-link': Link
+  },
   handleClick: function handleClick() {
     this.data.set('text', 'name');
+  }
+});
+
+/***/ }),
+
+/***/ "./src/components/date-picker/base/date.js":
+/*!*************************************************!*\
+  !*** ./src/components/date-picker/base/date.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var san = __webpack_require__(/*! san */ "./node_modules/san/dist/san.dev.js");
+
+var _require = __webpack_require__(/*! ../../../utils/date */ "./src/utils/date.js"),
+    formatDate = _require.formatDate;
+
+var _require2 = __webpack_require__(/*! ./util */ "./src/components/date-picker/base/util.js"),
+    weeks = _require2.weeks;
+
+module.exports = san.defineComponent({
+  template: "\n        <div>\n            <thead>\n                <th s-for=\"day in getDays(firstDayOfWeek)\">\n                    {{ day }}\n                </th>\n            </thead>\n            <tbody>\n                <tr s-for=\"week, i in [1,2,3,4,5,6]\">\n                    <td\n                        class=\"cell\"\n                        s-for=\"date, index in getDates(year, month, firstDayOfWeek, i)\"\n                        title=\"{{getCellTitle(date)}}\"\n                        on-click=\"selectDate(date)\">\n                        {{ date.day }}\n                    </td>\n                </tr>\n            </tbody>\n        </div>\n    ",
+  initData: function initData() {
+    return {
+      value: null,
+      startAt: null,
+      endAt: null,
+      dateFormat: 'yyyy-MM-dd',
+      month: new Date().getMonth(),
+      year: new Date().getFullYear(),
+      firstDayOfWeek: 7,
+      disabledDate: function disabledDate() {
+        return false;
+      }
+    };
+  },
+  computed: {},
+  selectDate: function selectDate(_ref) {
+    var year = _ref.year,
+        month = _ref.month,
+        day = _ref.day;
+    var date = new Date(year, month, day);
+    this.fire('select', date);
+  },
+  getDays: function getDays(firstDayOfWeek) {
+    var days = weeks.slice(0);
+    var firstDay = parseInt(firstDayOfWeek, 10);
+    return days.concat(days).slice(firstDay, firstDay + 7);
+  },
+  getDates: function getDates(year, month, firstDayOfWeek, i) {
+    var arr = [];
+    var time = new Date(year, month);
+    time.setDate(0); // 把时间切换到上个月最后一天
+
+    var lastMonthLength = (time.getDay() + 7 - firstDayOfWeek) % 7 + 1; // time.getDay() 0是星期天, 1是星期一 ...
+
+    var lastMonthfirst = time.getDate() - (lastMonthLength - 1);
+
+    for (var _i = 0; _i < lastMonthLength; _i++) {
+      arr.push({
+        year: year,
+        month: month - 1,
+        day: lastMonthfirst + _i
+      });
+    }
+
+    time.setMonth(time.getMonth() + 2, 0); // 切换到这个月最后一天
+
+    var curMonthLength = time.getDate();
+
+    for (var _i2 = 0; _i2 < curMonthLength; _i2++) {
+      arr.push({
+        year: year,
+        month: month,
+        day: 1 + _i2
+      });
+    }
+
+    time.setMonth(time.getMonth() + 1, 1); // 切换到下个月第一天
+
+    var nextMonthLength = 42 - (lastMonthLength + curMonthLength);
+
+    for (var _i3 = 0; _i3 < nextMonthLength; _i3++) {
+      arr.push({
+        year: year,
+        month: month + 1,
+        day: 1 + _i3
+      });
+    }
+
+    console.log('arr', arr);
+    return arr.slice(7 * i, 7 * i + 7);
+  },
+  getCellTitle: function getCellTitle(_ref2) {
+    var year = _ref2.year,
+        month = _ref2.month,
+        day = _ref2.day;
+    return formatDate(new Date(year, month, day), this.data.get('dateFormat'));
+  }
+});
+
+/***/ }),
+
+/***/ "./src/components/date-picker/base/month.js":
+/*!**************************************************!*\
+  !*** ./src/components/date-picker/base/month.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var san = __webpack_require__(/*! san */ "./node_modules/san/dist/san.dev.js");
+
+var _require = __webpack_require__(/*! ./util */ "./src/components/date-picker/base/util.js"),
+    months = _require.months;
+
+module.exports = san.defineComponent({
+  template: "\n        <div>\n            <span\n                s-for=\"month, i in months\"\n                on-click='selectMonth(i)'>\n                {{ month }}\n            </span>\n        </div>\n    ",
+  initData: function initData() {
+    return {
+      months: months
+    };
+  },
+  computed: {
+    curYear: function curYear() {
+      var value = this.data.get('value');
+      return value && new Date(value).getFullYear();
+    },
+    curMonth: function curMonth() {
+      var value = this.data.get('value');
+      return value && new Date(value).getMonth();
+    }
+  },
+  selectMonth: function selectMonth(month) {
+    this.fire('select', month);
+  }
+});
+
+/***/ }),
+
+/***/ "./src/components/date-picker/base/util.js":
+/*!*************************************************!*\
+  !*** ./src/components/date-picker/base/util.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = {
+  months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+  weeks: ['日', '一', '二', '三', '四', '五', '六']
+};
+
+/***/ }),
+
+/***/ "./src/components/date-picker/base/year.js":
+/*!*************************************************!*\
+  !*** ./src/components/date-picker/base/year.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var san = __webpack_require__(/*! san */ "./node_modules/san/dist/san.dev.js");
+
+module.exports = san.defineComponent({
+  template: "\n        <div>\n            <span\n                s-for=\"item, i in list\"\n                on-click='selectYear(startYear + i)'>\n                {{ startYear + i }}\n            </span>\n        </div>\n    ",
+  initData: function initData() {
+    return {
+      value: null,
+      list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      firstYear: 2019
+    };
+  },
+  computed: {
+    startYear: function startYear() {
+      return Math.floor(this.data.get('firstYear') / 10) * 10;
+    },
+    curYear: function curYear() {
+      var value = this.data.get('value');
+      return value && new Date(value).getFullYear();
+    }
+  },
+  selectYear: function selectYear(year) {
+    this.fire('select', year);
   }
 });
 
@@ -12819,17 +13006,392 @@ module.exports = san.defineComponent({
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var _require = __webpack_require__(/*! san-router */ "./node_modules/san-router/dist/san-router.source.js"),
-    router = _require.router;
+var router = __webpack_require__(/*! san-router */ "./node_modules/san-router/dist/san-router.source.js").router;
 
 var MyApp = __webpack_require__(/*! ./components/Todo */ "./src/components/Todo.js");
+
+var Year = __webpack_require__(/*! ./components/date-picker/base/year */ "./src/components/date-picker/base/year.js");
+
+var Month = __webpack_require__(/*! ./components/date-picker/base/month */ "./src/components/date-picker/base/month.js");
+
+var Date = __webpack_require__(/*! ./components/date-picker/base/date */ "./src/components/date-picker/base/date.js");
 
 router.add({
   rule: '/',
   Component: MyApp,
   target: '#app'
 });
+router.add({
+  rule: '/year',
+  Component: Year,
+  target: '#app'
+});
+router.add({
+  rule: '/month',
+  Component: Month,
+  target: '#app'
+});
+router.add({
+  rule: '/date',
+  Component: Date,
+  target: '#app'
+});
 router.start();
+
+/***/ }),
+
+/***/ "./src/utils/date.js":
+/*!***************************!*\
+  !*** ./src/utils/date.js ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var fecha = __webpack_require__(/*! ./fecha */ "./src/utils/fecha.js");
+
+module.exports = {
+  formatDate: function formatDate(date, format) {
+    try {
+      return fecha.format(new Date(date), format);
+    } catch (e) {
+      return '';
+    }
+  }
+};
+
+/***/ }),
+
+/***/ "./src/utils/fecha.js":
+/*!****************************!*\
+  !*** ./src/utils/fecha.js ***!
+  \****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_RESULT__;/*eslint-disable*/
+// 把 YYYY-MM-DD 改成了 yyyy-MM-dd
+(function (main) {
+  'use strict';
+  /**
+   * Parse or format dates
+   * @class fecha
+   */
+
+  var fecha = {};
+  var token = /d{1,4}|M{1,4}|yy(?:yy)?|S{1,3}|Do|ZZ|([HhMsDm])\1?|[aA]|"[^"]*"|'[^']*'/g;
+  var twoDigits = /\d\d?/;
+  var threeDigits = /\d{3}/;
+  var fourDigits = /\d{4}/;
+  var word = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i;
+
+  var noop = function noop() {};
+
+  function shorten(arr, sLen) {
+    var newArr = [];
+
+    for (var i = 0, len = arr.length; i < len; i++) {
+      newArr.push(arr[i].substr(0, sLen));
+    }
+
+    return newArr;
+  }
+
+  function monthUpdate(arrName) {
+    return function (d, v, i18n) {
+      var index = i18n[arrName].indexOf(v.charAt(0).toUpperCase() + v.substr(1).toLowerCase());
+
+      if (~index) {
+        d.month = index;
+      }
+    };
+  }
+
+  function pad(val, len) {
+    val = String(val);
+    len = len || 2;
+
+    while (val.length < len) {
+      val = '0' + val;
+    }
+
+    return val;
+  }
+
+  var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var monthNamesShort = shorten(monthNames, 3);
+  var dayNamesShort = shorten(dayNames, 3);
+  fecha.i18n = {
+    dayNamesShort: dayNamesShort,
+    dayNames: dayNames,
+    monthNamesShort: monthNamesShort,
+    monthNames: monthNames,
+    amPm: ['am', 'pm'],
+    DoFn: function DoFn(D) {
+      return D + ['th', 'st', 'nd', 'rd'][D % 10 > 3 ? 0 : (D - D % 10 !== 10) * D % 10];
+    }
+  };
+  var formatFlags = {
+    D: function D(dateObj) {
+      return dateObj.getDay();
+    },
+    DD: function DD(dateObj) {
+      return pad(dateObj.getDay());
+    },
+    Do: function Do(dateObj, i18n) {
+      return i18n.DoFn(dateObj.getDate());
+    },
+    d: function d(dateObj) {
+      return dateObj.getDate();
+    },
+    dd: function dd(dateObj) {
+      return pad(dateObj.getDate());
+    },
+    ddd: function ddd(dateObj, i18n) {
+      return i18n.dayNamesShort[dateObj.getDay()];
+    },
+    dddd: function dddd(dateObj, i18n) {
+      return i18n.dayNames[dateObj.getDay()];
+    },
+    M: function M(dateObj) {
+      return dateObj.getMonth() + 1;
+    },
+    MM: function MM(dateObj) {
+      return pad(dateObj.getMonth() + 1);
+    },
+    MMM: function MMM(dateObj, i18n) {
+      return i18n.monthNamesShort[dateObj.getMonth()];
+    },
+    MMMM: function MMMM(dateObj, i18n) {
+      return i18n.monthNames[dateObj.getMonth()];
+    },
+    yy: function yy(dateObj) {
+      return String(dateObj.getFullYear()).substr(2);
+    },
+    yyyy: function yyyy(dateObj) {
+      return dateObj.getFullYear();
+    },
+    h: function h(dateObj) {
+      return dateObj.getHours() % 12 || 12;
+    },
+    hh: function hh(dateObj) {
+      return pad(dateObj.getHours() % 12 || 12);
+    },
+    H: function H(dateObj) {
+      return dateObj.getHours();
+    },
+    HH: function HH(dateObj) {
+      return pad(dateObj.getHours());
+    },
+    m: function m(dateObj) {
+      return dateObj.getMinutes();
+    },
+    mm: function mm(dateObj) {
+      return pad(dateObj.getMinutes());
+    },
+    s: function s(dateObj) {
+      return dateObj.getSeconds();
+    },
+    ss: function ss(dateObj) {
+      return pad(dateObj.getSeconds());
+    },
+    S: function S(dateObj) {
+      return Math.round(dateObj.getMilliseconds() / 100);
+    },
+    SS: function SS(dateObj) {
+      return pad(Math.round(dateObj.getMilliseconds() / 10), 2);
+    },
+    SSS: function SSS(dateObj) {
+      return pad(dateObj.getMilliseconds(), 3);
+    },
+    a: function a(dateObj, i18n) {
+      return dateObj.getHours() < 12 ? i18n.amPm[0] : i18n.amPm[1];
+    },
+    A: function A(dateObj, i18n) {
+      return dateObj.getHours() < 12 ? i18n.amPm[0].toUpperCase() : i18n.amPm[1].toUpperCase();
+    },
+    ZZ: function ZZ(dateObj) {
+      var o = dateObj.getTimezoneOffset();
+      return (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4);
+    }
+  };
+  var parseFlags = {
+    d: [twoDigits, function (d, v) {
+      d.day = v;
+    }],
+    M: [twoDigits, function (d, v) {
+      d.month = v - 1;
+    }],
+    yy: [twoDigits, function (d, v) {
+      var da = new Date(),
+          cent = +('' + da.getFullYear()).substr(0, 2);
+      d.year = '' + (v > 68 ? cent - 1 : cent) + v;
+    }],
+    h: [twoDigits, function (d, v) {
+      d.hour = v;
+    }],
+    m: [twoDigits, function (d, v) {
+      d.minute = v;
+    }],
+    s: [twoDigits, function (d, v) {
+      d.second = v;
+    }],
+    yyyy: [fourDigits, function (d, v) {
+      d.year = v;
+    }],
+    S: [/\d/, function (d, v) {
+      d.millisecond = v * 100;
+    }],
+    SS: [/\d{2}/, function (d, v) {
+      d.millisecond = v * 10;
+    }],
+    SSS: [threeDigits, function (d, v) {
+      d.millisecond = v;
+    }],
+    D: [twoDigits, noop],
+    ddd: [word, noop],
+    MMM: [word, monthUpdate('monthNamesShort')],
+    MMMM: [word, monthUpdate('monthNames')],
+    a: [word, function (d, v, i18n) {
+      var val = v.toLowerCase();
+
+      if (val === i18n.amPm[0]) {
+        d.isPm = false;
+      } else if (val === i18n.amPm[1]) {
+        d.isPm = true;
+      }
+    }],
+    ZZ: [/[\+\-]\d\d:?\d\d/, function (d, v) {
+      var parts = (v + '').match(/([\+\-]|\d\d)/gi),
+          minutes;
+
+      if (parts) {
+        minutes = +(parts[1] * 60) + parseInt(parts[2], 10);
+        d.timezoneOffset = parts[0] === '+' ? minutes : -minutes;
+      }
+    }]
+  };
+  parseFlags.DD = parseFlags.DD;
+  parseFlags.dddd = parseFlags.ddd;
+  parseFlags.Do = parseFlags.dd = parseFlags.d;
+  parseFlags.mm = parseFlags.m;
+  parseFlags.hh = parseFlags.H = parseFlags.HH = parseFlags.h;
+  parseFlags.MM = parseFlags.M;
+  parseFlags.ss = parseFlags.s;
+  parseFlags.A = parseFlags.a; // Some common format strings
+
+  fecha.masks = {
+    'default': 'ddd MMM dd yyyy HH:mm:ss',
+    shortDate: 'M/D/yy',
+    mediumDate: 'MMM d, yyyy',
+    longDate: 'MMMM d, yyyy',
+    fullDate: 'dddd, MMMM d, yyyy',
+    shortTime: 'HH:mm',
+    mediumTime: 'HH:mm:ss',
+    longTime: 'HH:mm:ss.SSS'
+  };
+  /***
+   * Format a date
+   * @method format
+   * @param {Date|number} dateObj
+   * @param {string} mask Format of the date, i.e. 'mm-dd-yy' or 'shortDate'
+   */
+
+  fecha.format = function (dateObj, mask, i18nSettings) {
+    var i18n = i18nSettings || fecha.i18n;
+
+    if (typeof dateObj === 'number') {
+      dateObj = new Date(dateObj);
+    }
+
+    if (Object.prototype.toString.call(dateObj) !== '[object Date]' || isNaN(dateObj.getTime())) {
+      throw new Error('Invalid Date in fecha.format');
+    }
+
+    mask = fecha.masks[mask] || mask || fecha.masks['default'];
+    return mask.replace(token, function ($0) {
+      return $0 in formatFlags ? formatFlags[$0](dateObj, i18n) : $0.slice(1, $0.length - 1);
+    });
+  };
+  /**
+   * Parse a date string into an object, changes - into /
+   * @method parse
+   * @param {string} dateStr Date string
+   * @param {string} format Date parse format
+   * @returns {Date|boolean}
+   */
+
+
+  fecha.parse = function (dateStr, format, i18nSettings) {
+    var i18n = i18nSettings || fecha.i18n;
+
+    if (typeof format !== 'string') {
+      throw new Error('Invalid format in fecha.parse');
+    }
+
+    format = fecha.masks[format] || format; // Avoid regular expression denial of service, fail early for really long strings
+    // https://www.owasp.org/index.php/Regular_expression_Denial_of_Service_-_ReDoS
+
+    if (dateStr.length > 1000) {
+      return false;
+    }
+
+    var isValid = true;
+    var dateInfo = {};
+    format.replace(token, function ($0) {
+      if (parseFlags[$0]) {
+        var info = parseFlags[$0];
+        var index = dateStr.search(info[0]);
+
+        if (!~index) {
+          isValid = false;
+        } else {
+          dateStr.replace(info[0], function (result) {
+            info[1](dateInfo, result, i18n);
+            dateStr = dateStr.substr(index + result.length);
+            return result;
+          });
+        }
+      }
+
+      return parseFlags[$0] ? '' : $0.slice(1, $0.length - 1);
+    });
+
+    if (!isValid) {
+      return false;
+    }
+
+    var today = new Date();
+
+    if (dateInfo.isPm === true && dateInfo.hour != null && +dateInfo.hour !== 12) {
+      dateInfo.hour = +dateInfo.hour + 12;
+    } else if (dateInfo.isPm === false && +dateInfo.hour === 12) {
+      dateInfo.hour = 0;
+    }
+
+    var date;
+
+    if (dateInfo.timezoneOffset != null) {
+      dateInfo.minute = +(dateInfo.minute || 0) - +dateInfo.timezoneOffset;
+      date = new Date(Date.UTC(dateInfo.year || today.getFullYear(), dateInfo.month || 0, dateInfo.day || 1, dateInfo.hour || 0, dateInfo.minute || 0, dateInfo.second || 0, dateInfo.millisecond || 0));
+    } else {
+      date = new Date(dateInfo.year || today.getFullYear(), dateInfo.month || 0, dateInfo.day || 1, dateInfo.hour || 0, dateInfo.minute || 0, dateInfo.second || 0, dateInfo.millisecond || 0);
+    }
+
+    return date;
+  };
+  /* istanbul ignore next */
+
+
+  if ( true && module.exports) {
+    module.exports = fecha;
+  } else if (true) {
+    !(__WEBPACK_AMD_DEFINE_RESULT__ = (function () {
+      return fecha;
+    }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else {}
+})(this);
 
 /***/ })
 
