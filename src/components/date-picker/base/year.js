@@ -2,8 +2,9 @@ const san = require('san')
 
 module.exports = san.defineComponent({
     template: `
-        <div>
+        <div class='b-panel b-panel-year'>
             <span
+                class='cell {{ actived: curYear === startYear + i }}'
                 s-for="item, i in list"
                 on-click='selectYear(startYear + i)'>
                 {{ startYear + i }}
@@ -12,9 +13,7 @@ module.exports = san.defineComponent({
     `,
     initData() {
         return {
-            value: null,
-            list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            firstYear: 2019
+            list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         }
     },
     computed: {
@@ -28,5 +27,14 @@ module.exports = san.defineComponent({
     },
     selectYear(year) {
         this.fire('select', year)
+    },
+    created() {
+        console.log('first year', this.data.get('firstYear'))
     }
 })
+
+/**
+ * Props:
+ * value
+ * firstYear
+ */

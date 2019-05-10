@@ -3,8 +3,9 @@ const { months } = require('./util')
 
 module.exports = san.defineComponent({
     template: `
-        <div>
+        <div class='b-panel b-panel-month'>
             <span
+                class='cell {{ actived: curYear === year && curMonth === i }}'
                 s-for="month, i in months"
                 on-click='selectMonth(i)'>
                 {{ month }}
@@ -13,7 +14,8 @@ module.exports = san.defineComponent({
     `,
     initData() {
         return {
-            months: months
+            months: months,
+            year: new Date().getFullYear()
         }
     },
     computed: {
@@ -30,3 +32,9 @@ module.exports = san.defineComponent({
         this.fire('select', month)
     }
 })
+
+/**
+ * Props:
+ * value
+ * year
+ */

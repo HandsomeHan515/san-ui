@@ -1,6 +1,7 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
     mode: 'development',
@@ -13,7 +14,7 @@ module.exports = {
         path: path.resolve(__dirname, 'dist')
     },
     resolve: {
-        extensions: ['.js', '.san', '.css']
+        extensions: ['.js', '.san', '.scss']
     },
     module: {
         rules: [
@@ -36,6 +37,23 @@ module.exports = {
                 test: /\.san$/,
                 use: 'san-loader',
             },
+            {
+                test: /\.scss$/,
+                include: [path.resolve(__dirname, 'src/styles')],
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: [
+                                require('autoprefixer'),
+                            ]
+                        }
+                    },
+                    'sass-loader'
+                ]
+            }
         ]
     },
     plugins: [
@@ -43,31 +61,18 @@ module.exports = {
             template: path.resolve(__dirname, 'index.html')
         }),
         new CleanWebpackPlugin(),
+        new MiniCssExtractPlugin({
+            filename: "css/[name].bundle.css",
+            chunkFilename: "css/[id].chunk.css"
+        })
     ],
     devtool: "source-map",
     devServer: {
+        open: true,
+        hot: true,
         contentBase: path.join(__dirname, 'dist'),
         compress: true,
-        port: 9000
-    },
-    optimization: {
-        minimize: false, // 是否压缩打包文件 默认为 true
-        // splitChunks: {
-        //     cacheGroups: {
-        //         common: {
-        //             name: 'common',
-        //             minSize: 1,
-        //             chunks: 'all',
-        //             priority: 100,
-        //             minChunks: 2 // 使用含n个及以上的打包为一个文件
-        //         },
-        //         vendor: {
-        //             name: "vendor",
-        //             test: /[\\/]node_modules[\\/]/,
-        //             chunks: "all",
-        //             priority: 10
-        //         }
-        //     }
-        // }
+        host: 'localhost',
+        port: 8088
     }
 }

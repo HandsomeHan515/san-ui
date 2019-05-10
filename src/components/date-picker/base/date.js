@@ -4,8 +4,8 @@ const { weeks } = require('./util')
 
 module.exports = san.defineComponent({
     template: `
-        <div>
-            <thead>
+        <div class='b-panel b-panel-date'>
+            <thead class='b-date-header'>
                 <th s-for="day in getDays(firstDayOfWeek)">
                     {{ day }}
                 </th>
@@ -13,7 +13,7 @@ module.exports = san.defineComponent({
             <tbody>
                 <tr s-for="week, i in [1,2,3,4,5,6]">
                     <td
-                        class="cell"
+                        class="cell b-date-body {{getCellClasses(date)}}"
                         s-for="date, index in getDates(year, month, firstDayOfWeek, i)"
                         title="{{getCellTitle(date)}}"
                         on-click="selectDate(date)">
@@ -68,6 +68,42 @@ module.exports = san.defineComponent({
             arr.push({ year, month: month + 1, day: 1 + i })
         }
         return arr.slice(7 * i, 7 * i + 7)
+    },
+    getCellClasses({ year, month, day }) {
+        let classes = []
+        let cellTime = new Date(year, month, day).getTime()
+        let today = new Date().setHours(0, 0, 0, 0)
+        let curTime = this.data.get('value') && new Date(this.data.get('value')).setHours(0, 0, 0, 0)
+        let startTime = this.data.get('startAt') && new Date(this.data.get('startAt')).setHours(0, 0, 0, 0)
+        let endTime = this.data.get('endAt') && new Date(this.data.get('endAt')).setHours(0, 0, 0, 0)
+
+        if (month < this.data.get('month')) {
+            classes.push('last-month')
+        } else if (month > this.data.get('month')) {
+            classes.push('next-month')
+        } else {
+            classes.push('cur-month')
+        }
+
+        if (cellTime === today) {
+            classes.push('today')
+        }
+
+        // if (this.disabledDate(cellTime)) {
+        //     classes.push('disabled')
+        // }
+
+        if (curTime) {
+            if (cellTime === curTime) {
+                classes.push('actived')
+            } else if (startTime && cellTime <= curTime) {
+                classes.push('inrange')
+            } else if (endTime && cellTime >= curTime) {
+                classes.push('inrange')
+            }
+        }
+
+        return classes
     },
     getCellTitle({ year, month, day }) {
         return formatDate(new Date(year, month, day), this.data.get('dateFormat'))

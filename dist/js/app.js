@@ -12817,6 +12817,66 @@ module.exports = san.defineComponent({
 
 /***/ }),
 
+/***/ "./src/components/date-picker/Pikcer.js":
+/*!**********************************************!*\
+  !*** ./src/components/date-picker/Pikcer.js ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var san = __webpack_require__(/*! san */ "./node_modules/san/dist/san.dev.js");
+
+var Panel = __webpack_require__(/*! ./panel/panel */ "./src/components/date-picker/panel/panel.js");
+
+var _require = __webpack_require__(/*! ../../utils/date */ "./src/utils/date.js"),
+    transformDate = _require.transformDate,
+    isValidDate = _require.isValidDate;
+
+module.exports = san.defineComponent({
+  template: "\n        <div class='b-datepicker'>\n            <div class='b-input-wrapper' on-click=\"showPopup\">\n                <input\n                    class=\"b-input\"\n                    type=\"text\"\n                    autocomplete=\"off\"\n                    value=\"{{curVal}}\"\n                    placeholder=\"{{innerPlaceholder}}\"\n                    on-keydown=\"handleKeydown\"\n                    on-focus=\"handleFocus\"\n                    on-blur=\"handleBlur\"\n                    on-change=\"handleChange\">\n                <span\n                    s-if=\"showClearIcon\"\n                    class=\"b-input-append\"\n                    on-click=\"clearDate\">\n                    &#967;\n                </span>\n            </div>\n            <div class='b-datepicker-popup' s-if='popupVisible'>\n                <b-panel\n                    type=\"{{innerType}}\"\n                    date-format=\"{{innerDateFormat}}\"\n                    value=\"{{curVal}}\"\n                    visible=\"{{popupVisible}}\"\n                    on-select-date=\"selectDate\"\n                    on-select-time=\"selectTime\">\n                </b-panel>\n            </div>\n        </div>\n    ",
+  components: {
+    'b-panel': Panel
+  },
+  initData: function initData() {
+    return {
+      rili: new Date().getDate(),
+      curVal: null,
+      format: '',
+      popupVisible: false
+    };
+  },
+  computed: {
+    innnerDateFormat: function innnerDateFormat() {
+      if (this.data.get('format')) return this.data.get('format');
+      return 'yyyy-MM-dd';
+    },
+    showClearIcon: function showClearIcon() {
+      return !!this.data.get('curVal');
+    },
+    innerIcon: function innerIcon() {
+      return this.data.get('curVal') ? '' : '';
+    }
+  },
+  selectDate: function selectDate(date) {
+    var value = transformDate.formatdate.date2value(date, this.data.get('innnerDateFormat'));
+    this.data.set('curVal', value);
+    this.data.set('popupVisible', false);
+    this.fire('on-change', this.curVal);
+  },
+  handleFocus: function handleFocus(e) {
+    if (!this.data.get('popupVisible')) {
+      this.data.set('popupVisible', true);
+    }
+
+    this.fire('focus', e);
+  },
+  clearDate: function clearDate() {
+    this.data.set('curVal', '');
+  }
+});
+
+/***/ }),
+
 /***/ "./src/components/date-picker/base/date.js":
 /*!*************************************************!*\
   !*** ./src/components/date-picker/base/date.js ***!
@@ -12833,7 +12893,7 @@ var _require2 = __webpack_require__(/*! ./util */ "./src/components/date-picker/
     weeks = _require2.weeks;
 
 module.exports = san.defineComponent({
-  template: "\n        <div>\n            <thead>\n                <th s-for=\"day in getDays(firstDayOfWeek)\">\n                    {{ day }}\n                </th>\n            </thead>\n            <tbody>\n                <tr s-for=\"week, i in [1,2,3,4,5,6]\">\n                    <td\n                        class=\"cell\"\n                        s-for=\"date, index in getDates(year, month, firstDayOfWeek, i)\"\n                        title=\"{{getCellTitle(date)}}\"\n                        on-click=\"selectDate(date)\">\n                        {{ date.day }}\n                    </td>\n                </tr>\n            </tbody>\n        </div>\n    ",
+  template: "\n        <div class='b-panel b-panel-date'>\n            <thead class='b-date-header'>\n                <th s-for=\"day in getDays(firstDayOfWeek)\">\n                    {{ day }}\n                </th>\n            </thead>\n            <tbody>\n                <tr s-for=\"week, i in [1,2,3,4,5,6]\">\n                    <td\n                        class=\"cell b-date-body {{getCellClasses(date)}}\"\n                        s-for=\"date, index in getDates(year, month, firstDayOfWeek, i)\"\n                        title=\"{{getCellTitle(date)}}\"\n                        on-click=\"selectDate(date)\">\n                        {{ date.day }}\n                    </td>\n                </tr>\n            </tbody>\n        </div>\n    ",
   initData: function initData() {
     return {
       value: null,
@@ -12902,13 +12962,50 @@ module.exports = san.defineComponent({
       });
     }
 
-    console.log('arr', arr);
     return arr.slice(7 * i, 7 * i + 7);
   },
-  getCellTitle: function getCellTitle(_ref2) {
+  getCellClasses: function getCellClasses(_ref2) {
     var year = _ref2.year,
         month = _ref2.month,
         day = _ref2.day;
+    var classes = [];
+    var cellTime = new Date(year, month, day).getTime();
+    var today = new Date().setHours(0, 0, 0, 0);
+    var curTime = this.data.get('value') && new Date(this.data.get('value')).setHours(0, 0, 0, 0);
+    var startTime = this.data.get('startAt') && new Date(this.data.get('startAt')).setHours(0, 0, 0, 0);
+    var endTime = this.data.get('endAt') && new Date(this.data.get('endAt')).setHours(0, 0, 0, 0);
+
+    if (month < this.data.get('month')) {
+      classes.push('last-month');
+    } else if (month > this.data.get('month')) {
+      classes.push('next-month');
+    } else {
+      classes.push('cur-month');
+    }
+
+    if (cellTime === today) {
+      classes.push('today');
+    } // if (this.disabledDate(cellTime)) {
+    //     classes.push('disabled')
+    // }
+
+
+    if (curTime) {
+      if (cellTime === curTime) {
+        classes.push('actived');
+      } else if (startTime && cellTime <= curTime) {
+        classes.push('inrange');
+      } else if (endTime && cellTime >= curTime) {
+        classes.push('inrange');
+      }
+    }
+
+    return classes;
+  },
+  getCellTitle: function getCellTitle(_ref3) {
+    var year = _ref3.year,
+        month = _ref3.month,
+        day = _ref3.day;
     return formatDate(new Date(year, month, day), this.data.get('dateFormat'));
   }
 });
@@ -12928,10 +13025,11 @@ var _require = __webpack_require__(/*! ./util */ "./src/components/date-picker/b
     months = _require.months;
 
 module.exports = san.defineComponent({
-  template: "\n        <div>\n            <span\n                s-for=\"month, i in months\"\n                on-click='selectMonth(i)'>\n                {{ month }}\n            </span>\n        </div>\n    ",
+  template: "\n        <div class='b-panel b-panel-month'>\n            <span\n                class='cell {{ actived: curYear === year && curMonth === i }}'\n                s-for=\"month, i in months\"\n                on-click='selectMonth(i)'>\n                {{ month }}\n            </span>\n        </div>\n    ",
   initData: function initData() {
     return {
-      months: months
+      months: months,
+      year: new Date().getFullYear()
     };
   },
   computed: {
@@ -12948,6 +13046,11 @@ module.exports = san.defineComponent({
     this.fire('select', month);
   }
 });
+/**
+ * Props:
+ * value
+ * year
+ */
 
 /***/ }),
 
@@ -12975,12 +13078,10 @@ module.exports = {
 var san = __webpack_require__(/*! san */ "./node_modules/san/dist/san.dev.js");
 
 module.exports = san.defineComponent({
-  template: "\n        <div>\n            <span\n                s-for=\"item, i in list\"\n                on-click='selectYear(startYear + i)'>\n                {{ startYear + i }}\n            </span>\n        </div>\n    ",
+  template: "\n        <div class='b-panel b-panel-year'>\n            <span\n                class='cell {{ actived: curYear === startYear + i }}'\n                s-for=\"item, i in list\"\n                on-click='selectYear(startYear + i)'>\n                {{ startYear + i }}\n            </span>\n        </div>\n    ",
   initData: function initData() {
     return {
-      value: null,
-      list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      firstYear: 2019
+      list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     };
   },
   computed: {
@@ -12994,6 +13095,203 @@ module.exports = san.defineComponent({
   },
   selectYear: function selectYear(year) {
     this.fire('select', year);
+  },
+  created: function created() {
+    console.log('first year', this.data.get('firstYear'));
+  }
+});
+/**
+ * Props:
+ * value
+ * firstYear
+ */
+
+/***/ }),
+
+/***/ "./src/components/date-picker/panel/panel.js":
+/*!***************************************************!*\
+  !*** ./src/components/date-picker/panel/panel.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var san = __webpack_require__(/*! san */ "./node_modules/san/dist/san.dev.js");
+
+var TableDate = __webpack_require__(/*! ../base/date */ "./src/components/date-picker/base/date.js");
+
+var TableYear = __webpack_require__(/*! ../base/year */ "./src/components/date-picker/base/year.js");
+
+var TableMonth = __webpack_require__(/*! ../base/month */ "./src/components/date-picker/base/month.js");
+
+var _require = __webpack_require__(/*! ../base/util */ "./src/components/date-picker/base/util.js"),
+    months = _require.months;
+
+var _require2 = __webpack_require__(/*! ../../../utils/date */ "./src/utils/date.js"),
+    isDateObject = _require2.isDateObject,
+    formatDate = _require2.formatDate;
+
+module.exports = san.defineComponent({
+  template: "\n        <div class='b-calendar'>\n            <div class='b-calendar-header'>\n                <a\n                    s-if=\"panel !== 'TIME'\"\n                    class=\"b-icon-last-year\"\n                    on-click=\"handleIconYear(-1)\">\n                    <<\n                </a>\n                <a\n                    s-if=\"panel === 'DATE'\"\n                    class=\"b-icon-last-month\"\n                    on-click=\"handleIconMonth(-1)\">\n                    <\n                </a>\n                <a\n                    s-if=\"panel === 'YEAR'\"\n                    class=\"b-current-year\">\n                    {{yearHeader}}\n                </a>\n                <a\n                    s-if=\"panel === 'DATE'\"\n                    class=\"b-current-month\"\n                    on-click=\"handleClickMonth\">\n                    {{months[month]}}\n                </a>\n                <a\n                    s-if=\"panel === 'DATE' || panel === 'MONTH'\"\n                    class=\"b-current-year\"\n                    on-click=\"handleClickYear\">\n                    {{ year + ' \u5E74' }}\n                </a>\n                <a\n                    s-if=\"panel !== 'TIME'\"\n                    class=\"b-icon-next-year\"\n                    on-click=\"handleIconYear(1)\">\n                    >>\n                </a>\n                <a\n                    s-if=\"panel === 'DATE'\"\n                    class=\"b-icon-next-month\"\n                    on-click=\"handleIconMonth(1)\">\n                    >\n                </a>\n                <a\n                    s-if=\"panel === 'TIME'\"\n                    class=\"b-time-header\"\n                    on-click=\"handleTimeHeader\">\n                    {{ timeHeade r}}\n                </a>\n            </div>\n            <div class='b-calendar-content'>\n                <b-table-year\n                    s-if=\"panel === 'YEAR'\"\n                    value='{{value}}'\n                    first-year='{{firstYear}}'\n                    on-select=\"selectYear\">\n                </b-table-year>\n                <b-table-month\n                    s-if=\"panel === 'MONTH'\"\n                    value='{{value}}'\n                    year='{{year}}'\n                    on-select=\"selectMonth\">\n                </b-table-month>\n                <b-table-date\n                    s-if=\"panel === 'DATE'\"\n                    value='{{value}}'\n                    year='{{year}}'\n                    month='{{month}}'\n                    first-day-of-week='{{firstDayOfWeek}}'\n                    on-select=\"selectDate\">\n                </b-table-date>\n            </div>\n        </div>\n    ",
+  components: {
+    'b-table-date': TableDate,
+    'b-table-year': TableYear,
+    'b-table-month': TableMonth
+  },
+  initData: function initData() {
+    var _date = new Date();
+
+    var _year = _date.getFullYear();
+
+    var _month = _date.getMonth();
+
+    var _firstYear = Math.floor(_year / 10) * 10;
+
+    return {
+      panel: 'DATE',
+      dates: [],
+      year: _year,
+      month: _month,
+      firstYear: _firstYear,
+      months: months,
+      value: null,
+      type: 'date'
+    };
+  },
+  computed: {
+    yearHeader: function yearHeader() {
+      return "".concat(this.data.get('firstYear'), " ~ ").concat(this.data.get('firstYear') + 9);
+    },
+    timeHeader: function timeHeader() {
+      if (this.data.get('type') === 'time') {
+        return 'HH:mm:ss';
+      }
+
+      return this.data.get('value') ? formatDate(this.data.get('value'), this.data.get('dateFormat')) : '';
+    },
+    now: function now() {
+      return new Date(this.data.get('year'), this.data.get('month')).getTime();
+    }
+  },
+  created: function created() {
+    var _this = this;
+
+    this.watch('now', function (val) {
+      console.log('watch', val);
+
+      var _date = new Date(val);
+
+      _this.data.set('year', _date.getFullYear());
+
+      _this.data.set('month', _date.getMonth());
+    });
+    this.watch('value', function (val) {
+      _this.updateNow(val);
+    });
+    this.watch('panel', function (val) {
+      if (val === 'YEAR') {
+        _this.data.set('firstYear', Math.floor(_this.data.get('year') / 10) * 10);
+      }
+    });
+  },
+  updateNow: function updateNow(val) {
+    var now = val ? new Date(val) : new Date();
+    var oldNow = new Date(this.data.get('now'));
+    this.data.set('now', now);
+
+    if (!this.data.get('visible')) {
+      this.fire('calendar-change', now, oldNow);
+    }
+  },
+  init: function init(val) {
+    if (val) {
+      switch (this.data.get('type')) {
+        case 'year':
+          this.data.set('panel', 'YEAR');
+          break;
+
+        case 'month':
+          this.data.set('panel', 'MONTH');
+          break;
+
+        case 'date':
+          this.data.set('panel', 'DATE');
+          break;
+
+        case 'time':
+          this.data.set('panel', 'TIME');
+          break;
+
+        default:
+          this.data.set('panel', 'DATE');
+      }
+    } else {
+      this.updateNow(this.data.get('value'));
+    }
+  },
+  changePanelYears: function changePanelYears(flag) {
+    var firstYear = this.data.get('firstYear') + flag * 10;
+    this.data.set('firstYear', firstYear);
+  },
+  handleIconYear: function handleIconYear(flag) {
+    if (this.data.get('panel') === 'YEAR') {
+      this.changePanelYears(flag);
+    } else {
+      this.changeYear(this.data.get('year') + flag);
+    }
+  },
+  handleIconMonth: function handleIconMonth(flag) {
+    this.changeMonth(this.data.get('month') + flag);
+  },
+  handleTimeHeader: function handleTimeHeader() {
+    if (this.data.get('type') === 'time') return;
+    this.data.set('panel', 'DATE');
+  },
+  selectDate: function selectDate(date) {
+    if (this.data.get('type') === 'datetime') {
+      var time = new Date(date);
+
+      if (isDateObject(this.data.get('value'))) {
+        time.setHours(this.data.get('value').getHours(), this.data.get('value').getMinutes(), this.data.get('value').getSeconds());
+      }
+
+      this.selectTime(time);
+      return;
+    }
+
+    this.fire('select-date', date);
+  },
+  changeYear: function changeYear(year) {
+    this.updateNow(new Date(year, this.data.get('month')));
+  },
+  changeMonth: function changeMonth(month) {
+    this.updateNow(new Date(this.data.get('year'), month));
+  },
+  selectYear: function selectYear(year) {
+    this.changeYear(year);
+
+    if (this.data.get('type').toLowerCase() === 'year') {
+      return this.selectDate(new Date(this.data.get('now')));
+    }
+
+    this.panel = 'MONTH';
+  },
+  selectMonth: function selectMonth(month) {
+    this.changeMonth(month);
+
+    if (this.data.get('type').toLowerCase() === 'month') {
+      return this.selectDate(new Date(this.data.get('now')));
+    }
+
+    this.panel = 'DATE';
+  },
+  selectTime: function selectTime(time) {
+    this.fire('select-time', time, false);
+  },
+  handleClickYear: function handleClickYear() {
+    this.data.set('panel', 'YEAR');
+  },
+  handleClickMonth: function handleClickMonth() {
+    this.data.set('panel', 'MONTH');
   }
 });
 
@@ -13008,6 +13306,8 @@ module.exports = san.defineComponent({
 
 var router = __webpack_require__(/*! san-router */ "./node_modules/san-router/dist/san-router.source.js").router;
 
+__webpack_require__(/*! ./styles */ "./src/styles/index.scss");
+
 var MyApp = __webpack_require__(/*! ./components/Todo */ "./src/components/Todo.js");
 
 var Year = __webpack_require__(/*! ./components/date-picker/base/year */ "./src/components/date-picker/base/year.js");
@@ -13015,6 +13315,10 @@ var Year = __webpack_require__(/*! ./components/date-picker/base/year */ "./src/
 var Month = __webpack_require__(/*! ./components/date-picker/base/month */ "./src/components/date-picker/base/month.js");
 
 var Date = __webpack_require__(/*! ./components/date-picker/base/date */ "./src/components/date-picker/base/date.js");
+
+var Panel = __webpack_require__(/*! ./components/date-picker/panel/panel */ "./src/components/date-picker/panel/panel.js");
+
+var Picker = __webpack_require__(/*! ./components/date-picker/Pikcer */ "./src/components/date-picker/Pikcer.js");
 
 router.add({
   rule: '/',
@@ -13036,7 +13340,28 @@ router.add({
   Component: Date,
   target: '#app'
 });
+router.add({
+  rule: '/panel',
+  Component: Panel,
+  target: '#app'
+});
+router.add({
+  rule: '/picker',
+  Component: Picker,
+  target: '#app'
+});
 router.start();
+
+/***/ }),
+
+/***/ "./src/styles/index.scss":
+/*!*******************************!*\
+  !*** ./src/styles/index.scss ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// extracted by mini-css-extract-plugin
 
 /***/ }),
 
@@ -13049,14 +13374,64 @@ router.start();
 
 var fecha = __webpack_require__(/*! ./fecha */ "./src/utils/fecha.js");
 
-module.exports = {
-  formatDate: function formatDate(date, format) {
-    try {
-      return fecha.format(new Date(date), format);
-    } catch (e) {
-      return '';
+function formatDate(date, format) {
+  try {
+    return fecha.format(new Date(date), format);
+  } catch (e) {
+    return '';
+  }
+}
+
+function parseDate(str, format) {
+  try {
+    return fecha.parse(str, format);
+  } catch (e) {
+    return null;
+  }
+}
+
+function isDateObject(value) {
+  return value instanceof Date;
+}
+
+function isValidDate(date) {
+  if (date === null || date === undefined) {
+    return false;
+  }
+
+  return !isNaN(new Date(date).getTime());
+}
+
+var transformDate = {
+  date: {
+    value2date: function value2date(val) {
+      return isValidDate(val) ? new Date(val) : null;
+    },
+    date2value: function date2value(date) {
+      return date;
+    }
+  },
+  timestamp: {
+    value2date: function value2date(val) {
+      return isValidDate(val) ? new Date(val) : null;
+    },
+    date2value: function date2value(date) {
+      return isValidDate(date) ? new Date(date).getTime() : null;
+    }
+  },
+  formatdate: {
+    value2date: parseDate,
+    date2value: function date2value(date, format) {
+      return isValidDate(date) ? formatDate(date, format) : null;
     }
   }
+};
+module.exports = {
+  formatDate: formatDate,
+  parseDate: parseDate,
+  isDateObject: isDateObject,
+  isValidDate: isValidDate,
+  transformDate: transformDate
 };
 
 /***/ }),
