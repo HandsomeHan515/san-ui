@@ -1,8 +1,4 @@
 @charset "UTF-8";
-* {
-  margin: 0;
-  padding: 0; }
-
 .b-datepicker {
   margin-left: 500px;
   margin-top: 300px;
@@ -25,9 +21,7 @@
   max-height: none;
   background-color: #fff;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
-  z-index: 1000;
-  border-radius: 4px;
-  overflow: hidden; }
+  border-radius: 4px; }
   .b-datepicker-popup .b-datepicker-popup-content {
     display: flex;
     flex-direction: row; }
@@ -195,13 +189,11 @@
 .b-input-wrapper {
   position: relative; }
   .b-input-wrapper .b-input {
-    display: inline-block;
-    width: 100%;
+    width: 240px;
     height: 34px;
-    padding: 6px;
-    padding-left: 10px;
+    padding: 4px 20px 4px 10px;
     font-size: 14px;
-    line-height: 1.4;
+    line-height: 42px;
     color: #555;
     background-color: #fff;
     border: 1px solid #ccc;
@@ -214,11 +206,12 @@
       outline: none; }
     .b-input-wrapper .b-input::-ms-clear {
       display: none; }
-  .b-input-wrapper .b-input-append {
-    position: absolute;
-    top: 0;
-    right: 0;
-    line-height: 48px; }
+    .b-input-wrapper .b-input-append {
+      height: 42px;
+      position: absolute;
+      top: 0;
+      right: 10px;
+      line-height: 42px; }
 
 
 /*# sourceMappingURL=app.bundle.css.map*/

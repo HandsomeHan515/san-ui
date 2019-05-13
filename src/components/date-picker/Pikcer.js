@@ -2,36 +2,38 @@ const san = require('san')
 const Panel = require('./panel/panel')
 
 const { transformDate, isValidDate } = require('../../utils/date')
+const { isString } = require('@/utils')
 
 module.exports = san.defineComponent({
     template: `
         <div class='b-datepicker'>
-            <div class='b-input-wrapper' on-click="showPopup">
+            <div class='b-input-wrapper'>
                 <input
                     class="b-input"
                     type="text"
                     autocomplete="off"
-                    value="{{curVal}}"
+                    value="{{value}}"
+                    disabled="{{disabled}}"
                     placeholder="{{innerPlaceholder}}"
-                    on-keydown="handleKeydown"
                     on-focus="handleFocus"
-                    on-blur="handleBlur"
-                    on-change="handleChange">
+                    on-blur="handleBlur">
                 <span
                     s-if="showClearIcon"
                     class="b-input-append"
                     on-click="clearDate">
-                    &#967;
+                    X
                 </span>
             </div>
             <div class='b-datepicker-popup' s-if='popupVisible'>
                 <b-panel
                     type="{{innerType}}"
                     date-format="{{innerDateFormat}}"
-                    value="{{curVal}}"
+                    value="{{value}}"
+                    not-before="{{notBefore}}"
+                    not-after="{{notAfter}}"
+                    disabled-days="{{disabledDays}}"
                     visible="{{popupVisible}}"
-                    on-select-date="selectDate"
-                    on-select-time="selectTime">
+                    on-select-date="selectDate">
                 </b-panel>
             </div>
         </div>
@@ -40,31 +42,45 @@ module.exports = san.defineComponent({
         'b-panel': Panel
     },
     initData() {
+        const _date = new Date().getTime()
+        const preDate = new Date(_date - (3600 * 1000 * 24))
+        const nextDate = new Date(_date + (3600 * 1000 * 24))
+
         return {
             rili: new Date().getDate(),
-            curVal: null,
-            format: '',
-            popupVisible: false
+            popupVisible: false,
+            // props:
+            value: null,
+            placeholder: '请选择日期',
+            format: 'yyyy-MM-dd',
+            disabled: false,
+            notBefore: new Date(),
+            notAfter: nextDate,
+            // disabledDays: [preDate, new Date(), nextDate]
         }
     },
     computed: {
+        showClearIcon() {
+            return !!this.data.get('value')
+        },
         innnerDateFormat() {
-            if (this.data.get('format')) return this.data.get('format')
+            const format = this.data.get('format')
+            if (format) return format
             return 'yyyy-MM-dd'
         },
-        showClearIcon() {
-
-            return !!this.data.get('curVal')
+        innerPlaceholder() {
+            if (!isString(this.data.get('placeholder'))) return
+            return this.data.get('placeholder')
         },
-        innerIcon() {
-            return this.data.get('curVal') ? '' : ''
+        innerType() {
+            return String(this.data.get('type')).toLowerCase()
         }
     },
     selectDate(date) {
         const value = transformDate.formatdate.date2value(date, this.data.get('innnerDateFormat'))
-        this.data.set('curVal', value)
+        this.data.set('value', value)
         this.data.set('popupVisible', false)
-        this.fire('on-change', this.curVal)
+        this.fire('change', value)
     },
     handleFocus(e) {
         if (!this.data.get('popupVisible')) {
@@ -72,7 +88,11 @@ module.exports = san.defineComponent({
         }
         this.fire('focus', e)
     },
+    handleBlur(e) {
+        this.fire('blur', e)
+    },
     clearDate() {
-        this.data.set('curVal', '')
-    }
+        this.data.set('value', '')
+        this.data.set('popupVisible', false)
+    },
 })

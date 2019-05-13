@@ -1,6 +1,7 @@
 const san = require('san')
-const { formatDate } = require('../../../utils/date')
-const { weeks } = require('./util')
+const { DataTypes } = require('san')
+const { formatDate } = require('@/utils/date')
+const { inAfter, inBefore, inDisabledDays, weeks } = require('./util')
 
 module.exports = san.defineComponent({
     template: `
@@ -23,21 +24,28 @@ module.exports = san.defineComponent({
             </tbody>
         </div>
     `,
+    dataTypes: {
+        month: DataTypes.number.isRequired,
+        year: DataTypes.number.isRequired,
+        dateFormat: DataTypes.string,
+        firstDayOfWeek: DataTypes.number,
+    },
     initData() {
         return {
+            // Props:
             value: null,
             startAt: null,
             endAt: null,
             dateFormat: 'yyyy-MM-dd',
             month: new Date().getMonth(),
             year: new Date().getFullYear(),
-            firstDayOfWeek: 7,
-            disabledDate: () => false
+            firstDayOfWeek: 7
         }
     },
-    computed: {},
     selectDate({ year, month, day }) {
         const date = new Date(year, month, day)
+        if (this.disabledDate(date)) return
+
         this.fire('select', date)
     },
     getDays(firstDayOfWeek) {
@@ -67,6 +75,7 @@ module.exports = san.defineComponent({
         for (let i = 0; i < nextMonthLength; i++) {
             arr.push({ year, month: month + 1, day: 1 + i })
         }
+
         return arr.slice(7 * i, 7 * i + 7)
     },
     getCellClasses({ year, month, day }) {
@@ -89,9 +98,9 @@ module.exports = san.defineComponent({
             classes.push('today')
         }
 
-        // if (this.disabledDate(cellTime)) {
-        //     classes.push('disabled')
-        // }
+        if (this.disabledDate(cellTime)) {
+            classes.push('disabled')
+        }
 
         if (curTime) {
             if (cellTime === curTime) {
@@ -107,5 +116,11 @@ module.exports = san.defineComponent({
     },
     getCellTitle({ year, month, day }) {
         return formatDate(new Date(year, month, day), this.data.get('dateFormat'))
+    },
+    disabledDate(date) {
+        const time = new Date(date).getTime()
+        const maxTime = new Date(date).setHours(23, 59, 59, 999)
+        const { notBefore, notAfter, disabledDays } = this.data.get()
+        return inBefore(maxTime, notBefore) || inAfter(time, notAfter) || inDisabledDays(time, disabledDays)
     }
 })

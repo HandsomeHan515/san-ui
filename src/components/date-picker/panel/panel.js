@@ -62,20 +62,32 @@ module.exports = san.defineComponent({
                 <b-table-year
                     s-if="panel === 'YEAR'"
                     value='{{value}}'
+                    type="{{type}}"
                     first-year='{{firstYear}}'
+                    not-before="{{notBefore}}"
+                    not-after="{{notAfter}}"
+                    disabled-days="{{disabledDays}}"
                     on-select="selectYear">
                 </b-table-year>
                 <b-table-month
                     s-if="panel === 'MONTH'"
                     value='{{value}}'
+                    type="{{type}}"
                     year='{{year}}'
+                    not-before="{{notBefore}}"
+                    not-after="{{notAfter}}"
+                    disabled-days="{{disabledDays}}"
                     on-select="selectMonth">
                 </b-table-month>
                 <b-table-date
                     s-if="panel === 'DATE'"
                     value='{{value}}'
+                    type="{{type}}"
                     year='{{year}}'
                     month='{{month}}'
+                    not-before="{{notBefore}}"
+                    not-after="{{notAfter}}"
+                    disabled-days="{{disabledDays}}"
                     first-day-of-week='{{firstDayOfWeek}}'
                     on-select="selectDate">
                 </b-table-date>
@@ -120,9 +132,8 @@ module.exports = san.defineComponent({
             return new Date(this.data.get('year'), this.data.get('month')).getTime()
         }
     },
-    created() {
+    attached() {
         this.watch('now', val => {
-            console.log('watch', val)
             const _date = new Date(val)
             this.data.set('year', _date.getFullYear())
             this.data.set('month', _date.getMonth())
@@ -209,17 +220,17 @@ module.exports = san.defineComponent({
     },
     selectYear(year) {
         this.changeYear(year)
-        if (this.data.get('type').toLowerCase() === 'year') {
+        if (this.data.get('type') === 'year') {
             return this.selectDate(new Date(this.data.get('now')))
         }
-        this.panel = 'MONTH'
+        this.data.set('panel', 'MONTH')
     },
     selectMonth(month) {
         this.changeMonth(month)
-        if (this.data.get('type').toLowerCase() === 'month') {
+        if (this.data.get('type') === 'month') {
             return this.selectDate(new Date(this.data.get('now')))
         }
-        this.panel = 'DATE'
+        this.data.set('panel', 'DATE')
     },
     selectTime(time) {
         this.fire('select-time', time, false)
