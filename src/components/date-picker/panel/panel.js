@@ -127,16 +127,15 @@ module.exports = san.defineComponent({
             return this.data.get('value')
                 ? formatDate(this.data.get('value'), this.data.get('dateFormat'))
                 : ''
-        },
-        now() {
-            return new Date(this.data.get('year'), this.data.get('month')).getTime()
         }
     },
     attached() {
         this.watch('now', val => {
             const _date = new Date(val)
-            this.data.set('year', _date.getFullYear())
-            this.data.set('month', _date.getMonth())
+            const year = _date.getFullYear()
+            const month = _date.getMonth()
+            this.data.set('year', year)
+            this.data.set('month', month)
         })
 
         this.watch('value', val => {
@@ -151,11 +150,7 @@ module.exports = san.defineComponent({
     },
     updateNow(val) {
         const now = val ? new Date(val) : new Date()
-        const oldNow = new Date(this.data.get('now'))
         this.data.set('now', now)
-        if (!this.data.get('visible')) {
-            this.fire('calendar-change', now, oldNow)
-        }
     },
     init(val) {
         if (val) {
@@ -213,10 +208,12 @@ module.exports = san.defineComponent({
         this.fire('select-date', date)
     },
     changeYear(year) {
-        this.updateNow(new Date(year, this.data.get('month')))
+        const { month } = this.data.get()
+        this.updateNow(new Date(year, month))
     },
     changeMonth(month) {
-        this.updateNow(new Date(this.data.get('year'), month))
+        const { year } = this.data.get()
+        this.updateNow(new Date(year, month))
     },
     selectYear(year) {
         this.changeYear(year)

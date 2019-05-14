@@ -55,7 +55,7 @@ module.exports = san.defineComponent({
             format: 'yyyy-MM-dd',
             disabled: false,
             notBefore: new Date(),
-            notAfter: nextDate,
+            // notAfter: nextDate,
             // disabledDays: [preDate, new Date(), nextDate]
         }
     },

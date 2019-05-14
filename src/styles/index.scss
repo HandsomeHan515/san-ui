@@ -131,7 +131,7 @@ $bgFont: #ccc;
       .#{$css-prefix-icon}-last-month,
       .#{$css-prefix-icon}-next-month {
         padding: 0 6px;
-        font-size: 20px;
+        font-size: 16px;
         line-height: 30px;
         color: $bgFont !important;
       }
@@ -182,35 +182,34 @@ $bgFont: #ccc;
     height: 100%;
     text-align: center;
   }
-
+  // Tabel Date
   .#{$css-prefix-panel}-date {
     table-layout: fixed;
     border-collapse: collapse;
     border-spacing: 0;
+
     .#{$css-prefix-date}-header, .#{$css-prefix-date}-body {
-      font-size: 12px;
-      width: 32px;
-      height: 32px;
-      line-height: 32px;
+      list-style: none;
       padding: 0;
-      overflow: hidden;
-      text-align: center;
-      border: none;
-    }
-
-    .#{$css-prefix-date}-header {
-      color: $DisContent;
-    }
-
-    .#{$css-prefix-date}-body {
+      margin: 0;
       border: 0;
-      color: $Content;
-      &.today {
-        color: mix($white, $Primary, 10%);
-      }
-      &.last-month,
-      &.next-month {
-        color: #ddd;
+
+      &-item {
+        display: inline-block;
+        font-size: 12px;
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        text-align: center;
+        border: 0;
+        color: $Content;
+
+        &.today {
+          color: mix($white, $Primary, 10%);
+        }
+        &.last-month, &.next-month {
+          color: #ddd;
+        }
       }
     }
   }
