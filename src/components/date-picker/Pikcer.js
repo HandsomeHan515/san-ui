@@ -12,7 +12,7 @@ module.exports = san.defineComponent({
                     class="b-input"
                     type="text"
                     autocomplete="off"
-                    value="{{value}}"
+                    value="{{text}}"
                     disabled="{{disabled}}"
                     placeholder="{{innerPlaceholder}}"
                     on-focus="handleFocus"
@@ -33,8 +33,14 @@ module.exports = san.defineComponent({
                     not-after="{{notAfter}}"
                     disabled-days="{{disabledDays}}"
                     visible="{{popupVisible}}"
-                    on-select-date="selectDate">
+                    on-select-date="selectDate"
+                    on-select-time="selectTime">
                 </b-panel>
+            </div>
+            <div class="b-datepicker-footer">
+                <b-button on-click="confirmDate">
+                    确定
+                </b-button>
             </div>
         </div>
     `,
@@ -50,9 +56,12 @@ module.exports = san.defineComponent({
             rili: new Date().getDate(),
             popupVisible: false,
             // props:
+            text: null,
             value: null,
+            type: 'date',
             placeholder: '请选择日期',
-            format: 'yyyy-MM-dd',
+            format: 'HH:mm:ss',
+            // format: 'yyyy-MM-dd',
             disabled: false,
             notBefore: new Date(),
             // notAfter: nextDate,
@@ -78,8 +87,16 @@ module.exports = san.defineComponent({
     },
     selectDate(date) {
         const value = transformDate.formatdate.date2value(date, this.data.get('innnerDateFormat'))
-        this.data.set('value', value)
+        this.data.set('value', date)
+        this.data.set('text', value)
         this.data.set('popupVisible', false)
+        this.fire('change', value)
+    },
+    selectTime(time, close) {
+        const value = transformDate.formatdate.date2value(time, this.data.get('innnerDateFormat'))
+        this.data.set('value', time)
+        this.data.set('text', value)
+        close && this.data.set('popupVisible', false)
         this.fire('change', value)
     },
     handleFocus(e) {
@@ -92,7 +109,11 @@ module.exports = san.defineComponent({
         this.fire('blur', e)
     },
     clearDate() {
-        this.data.set('value', '')
+        this.data.set('value', null)
+        this.data.set('text', null)
         this.data.set('popupVisible', false)
     },
+    confirmDate() {
+        this.data.set('popupVisible', false)
+    }
 })

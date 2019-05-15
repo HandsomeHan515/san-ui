@@ -213,7 +213,7 @@ $bgFont: #ccc;
       }
     }
   }
-
+  // Table Year
   .#{$css-prefix-panel}-year {
     padding: 7px 0;
     .cell {
@@ -223,7 +223,7 @@ $bgFont: #ccc;
       line-height: 40px;
     }
   }
-
+  // Table Month
   .#{$css-prefix-panel}-month {
     .cell {
       display: inline-block;
@@ -232,12 +232,15 @@ $bgFont: #ccc;
       margin: 8px 1.5%;
     }
   }
-
+  // Table Time
   .#{$css-prefix-time}-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 0;
     box-sizing: border-box;
     position: relative; // 定位 offsetParent
     float: left;
-    margin: 0;
     list-style: none;
     width: 100%;
     height: 100%;

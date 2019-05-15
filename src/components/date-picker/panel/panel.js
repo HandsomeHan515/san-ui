@@ -2,6 +2,7 @@ const san = require('san')
 const TableDate = require('../base/date')
 const TableYear = require('../base/year')
 const TableMonth = require('../base/month')
+const TableTime = require('../base/time')
 
 const { months } = require('../base/util')
 const { isDateObject, formatDate } = require('../../../utils/date')
@@ -55,7 +56,7 @@ module.exports = san.defineComponent({
                     s-if="panel === 'TIME'"
                     class="b-time-header"
                     on-click="handleTimeHeader">
-                    {{ timeHeade r}}
+                    {{ timeHeader }}
                 </a>
             </div>
             <div class='b-calendar-content'>
@@ -91,13 +92,21 @@ module.exports = san.defineComponent({
                     first-day-of-week='{{firstDayOfWeek}}'
                     on-select="selectDate">
                 </b-table-date>
+                <b-table-time
+                    s-if="panel === 'TIME'"
+                    value="{{value}}"
+                    type="{{type}}"
+                    minute-step="{{minuteStep}}"
+                    on-select="selectTime">
+                </b-table-time>
             </div>
         </div>
     `,
     components: {
         'b-table-date': TableDate,
         'b-table-year': TableYear,
-        'b-table-month': TableMonth
+        'b-table-month': TableMonth,
+        'b-table-time': TableTime
     },
     initData() {
         const _date = new Date()
@@ -106,14 +115,16 @@ module.exports = san.defineComponent({
         const _firstYear = Math.floor(_year / 10) * 10
 
         return {
-            panel: 'DATE',
+            panel: 'TIME',
             dates: [],
             year: _year,
             month: _month,
             firstYear: _firstYear,
             months,
             value: null,
-            type: 'date'
+            type: 'time',
+            visible: false,
+            minuteStep: 0
         }
     },
     computed: {
@@ -124,9 +135,9 @@ module.exports = san.defineComponent({
             if (this.data.get('type') === 'time') {
                 return 'HH:mm:ss'
             }
-            return this.data.get('value')
-                ? formatDate(this.data.get('value'), this.data.get('dateFormat'))
-                : ''
+            // return this.data.get('value')
+            //     ? formatDate(this.data.get('value'), this.data.get('dateFormat'))
+            //     : ''
         }
     },
     attached() {
@@ -139,8 +150,12 @@ module.exports = san.defineComponent({
         })
 
         this.watch('value', val => {
-            this.updateNow(val)
+
         })
+
+        if (this.data.get('visible')) {
+            this.updateNow(this.data.get('value'))
+        }
 
         this.watch('panel', val => {
             if (val === 'YEAR') {
@@ -151,28 +166,6 @@ module.exports = san.defineComponent({
     updateNow(val) {
         const now = val ? new Date(val) : new Date()
         this.data.set('now', now)
-    },
-    init(val) {
-        if (val) {
-            switch (this.data.get('type')) {
-                case 'year':
-                    this.data.set('panel', 'YEAR')
-                    break
-                case 'month':
-                    this.data.set('panel', 'MONTH')
-                    break
-                case 'date':
-                    this.data.set('panel', 'DATE')
-                    break
-                case 'time':
-                    this.data.set('panel', 'TIME')
-                    break
-                default:
-                    this.data.set('panel', 'DATE')
-            }
-        } else {
-            this.updateNow(this.data.get('value'))
-        }
     },
     changePanelYears(flag) {
         const firstYear = this.data.get('firstYear') + flag * 10
@@ -193,18 +186,18 @@ module.exports = san.defineComponent({
         this.data.set('panel', 'DATE')
     },
     selectDate(date) {
-        if (this.data.get('type') === 'datetime') {
-            let time = new Date(date)
-            if (isDateObject(this.data.get('value'))) {
-                time.setHours(
-                    this.data.get('value').getHours(),
-                    this.data.get('value').getMinutes(),
-                    this.data.get('value').getSeconds()
-                )
-            }
-            this.selectTime(time)
-            return
-        }
+        // if (this.data.get('type') === 'datetime') {
+        //     let time = new Date(date)
+        //     if (isDateObject(this.data.get('value'))) {
+        //         time.setHours(
+        //             this.data.get('value').getHours(),
+        //             this.data.get('value').getMinutes(),
+        //             this.data.get('value').getSeconds()
+        //         )
+        //     }
+        //     this.selectTime(time)
+        //     return
+        // }
         this.fire('select-date', date)
     },
     changeYear(year) {

@@ -30,11 +30,51 @@ function inDisabledDays(time, disabledDays) {
     return disabledDays.some(v => getCriticalTime(v) === time)
 }
 
+function scrollTop(el, from = 0, to, duration = 500, endCallback) {
+    if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = (
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function (callback) {
+                return window.setTimeout(callback, 1000 / 60)
+            }
+        )
+
+        window.cancelAnimationFrame = window.cancelAnimationFrame || clearTimeout
+    }
+    const difference = Math.abs(from - to)
+    const step = Math.ceil(difference / duration * 50)
+    function scroll(start, end, step) {
+        if (start === end) {
+            endCallback && endCallback()
+            return
+        }
+        let d = (start + step > end) ? end : start + step
+        if (start > end) {
+            d = (start - step < end) ? end : start - step
+        }
+        if (el === window) {
+            window.scrollTo(d, d)
+        } else {
+            el.scrollTop = d
+        }
+        window.requestAnimationFrame(() => scroll(d, end, step))
+    }
+    scroll(from, to, step)
+}
+
+function firstUpperCase(str) {
+    return str.toString()[0].toUpperCase() + str.toString().slice(1)
+}
+
 module.exports = {
     months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
     weeks: ['日', '一', '二', '三', '四', '五', '六'],
     getCriticalTime,
     inBefore,
     inAfter,
-    inDisabledDays
+    inDisabledDays,
+    scrollTop,
+    firstUpperCase
 }
