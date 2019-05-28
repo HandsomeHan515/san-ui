@@ -1,0 +1,25 @@
+$css-prefix: 'b-';
+$btn-prefix-cls: $css-prefix + 'btn';
+
+.#{$btn-prefix-cls} {
+    @include btn;
+    
+    &-long{
+        width: 100%;
+    }
+
+    &-success {
+        @include btn-color($Success);
+    }
+    &-warning {
+        @include btn-color($Warning);
+    }
+
+    &-error {
+        @include btn-color($Error);
+    }
+
+    &-info {
+        @include btn-color($Info);
+    }
+}

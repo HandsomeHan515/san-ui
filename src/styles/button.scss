@@ -1,0 +1,154 @@
+@mixin button-size($padding, $font-size, $border-radius) {
+    padding: $padding;
+    font-size: $font-size;
+    border-radius: $border-radius;
+  }
+  
+@mixin button-color($color, $background, $border) {
+    color: $color;
+    background-color: $background;
+    border-color: $border;
+    > a:only-child {
+        color: currentColor;
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: transparent;
+        }
+    }
+}
+  
+@mixin button-variant($color, $background, $border) {
+    @include button-color($color, $background, $border);
+  
+    &::hover {
+      @include button-color(rgba($color, .8), rgba($background, .8), rgba($border, .8));
+    }
+    &::active, &.active {
+      @include button-color(rgba($color, .05), rgba($background, .05), rgba($border, .05));
+    }
+  
+    &.disabled,
+    &[disabled],
+    fieldset[disabled] & {
+        &,
+        &::hover,
+        &::focus,
+        &::active,
+        &.active {
+          @include button-color($btn-disable-color, $btn-disable-bg, $btn-disable-border);
+        }
+    }
+  }
+  
+@mixin btn-color($color) {
+    @include button-variant(#fff, $color, $color);
+  
+    &::hover, &::active, &.active {
+      color: #fff;
+    }
+}
+
+@mixin btn {
+    display: inline-block;
+    margin-bottom: 0;
+    font-weight: $btn-font-weight;
+    text-align: center;
+    vertical-align: middle;
+    touch-action: manipulation;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    line-height: $line-height-base;
+    user-select: none;
+    transition: color .2 linear, background-color .2 linear, border .2 linear, box-shadow .2 linear;
+    @include button-size($btn-padding-base, $btn-font-size, $btn-border-radius);
+  
+    // > .#{$css-prefix-iconfont} {
+    //     line-height: $line-height-base;
+    //     vertical-align: middle;
+    // }
+  
+    // &-icon-only &-circle > .#{$css-prefix-iconfont} {
+    //     vertical-align: baseline;
+    // }
+  
+    > span {
+        vertical-align: middle;
+    }
+  
+    &,
+    &:active,
+    &:focus {
+        outline: 0;
+    }
+  
+    &:not([disabled])::hover {
+        text-decoration: none;
+    }
+  
+    &:not([disabled])::active {
+        outline: 0;
+        // transition: none;  // 如果不注释此行，那么active会和focus同时触发，此时focus的开始动画transition会无效
+    }
+  
+    &.disabled,
+    &[disabled] {
+        cursor: $cursor-disabled;
+        > * {
+            pointer-events: none;
+        }
+    }
+  
+    // &-large {
+    //     .button-size(@btn-padding-large; @btn-font-size-large; @btn-border-radius);
+    // }
+  
+    // &-small {
+    //     .button-size(@btn-padding-small; @btn-font-size; @btn-border-radius-small);
+    // }
+  
+    // &-icon-only{
+    //     .button-size(@btn-padding-base-icon; @btn-font-size; @btn-border-radius);
+    // }
+    // &-icon-only&-small{
+    //     .button-size(@btn-padding-small-icon; @btn-font-size; @btn-border-radius-small);
+    // }
+    // &-icon-only&-large{
+    //     .button-size(@btn-padding-large-icon; @btn-font-size-large; @btn-border-radius);
+    // }
+  }
+  
+  // Default
+// .btn-default() {
+//     .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
+  
+//     &:hover
+//     //&:focus
+//     {
+//         .button-color(tint(@primary-color, 20%); white; tint(@primary-color, 20%));
+//     }
+//     &:active,
+//     &.active {
+//         .button-color(shade(@primary-color, 5%); white; shade(@primary-color, 5%));
+//     }
+//     .active-btn-color(@primary-color);
+//   }
+  
+//   // Primary
+//   .btn-primary() {
+//     .button-variant(@btn-primary-color; @btn-primary-bg; @primary-color);
+  
+//     &:hover,
+//     //&:focus,
+//     &:active,
+//     &.active {
+//         color: @btn-primary-color;
+//     }
+//     .active-btn-color(@primary-color);
+//   }
