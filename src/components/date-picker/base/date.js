@@ -15,7 +15,7 @@ module.exports = san.defineComponent({
             </ol>
             <ul class='b-date-body'>
                 <li 
-                    class="cell b-date-body-item {{getCellClasses(date)}}"
+                    class="cell b-date-body-item {{getDisabledClasses(date)}} {{date.classes}}"
                     s-for="date in dates"
                     title="{{getCellTitle(date)}}"
                     on-click="selectDate(date)">
@@ -44,9 +44,36 @@ module.exports = san.defineComponent({
     },
     computed: {
         dates() {
+            // 判断样式
+            const value = this.data.get('value')
+            const startAt = this.data.get('startAt')
+            const endAt = this.data.get('endAt')
+            let today = new Date().setHours(0, 0, 0, 0)
+            let curTime = value && new Date(value).setHours(0, 0, 0, 0)
+            let startTime = startAt && new Date(startAt).setHours(0, 0, 0, 0)
+            let endTime = endAt && new Date(endAt).setHours(0, 0, 0, 0)
+            //
             const year = this.data.get('year')
             const month = this.data.get('month')
             const firstDayOfWeek = this.data.get('firstDayOfWeek')
+
+            const getCellClasses = function (year, month, day) {
+                let classes = []
+                const cellTime = new Date(year, month, day).getTime()
+                if (cellTime === today) {
+                    classes.push('today')
+                }
+                if (curTime) {
+                    if (cellTime === curTime) {
+                        classes.push('actived')
+                    } else if (startTime && cellTime <= curTime) {
+                        classes.push('inrange')
+                    } else if (endTime && cellTime >= curTime) {
+                        classes.push('inrange')
+                    }
+                }
+                return classes
+            }
 
             let arr = []
             let time = new Date(year, month)
@@ -55,19 +82,22 @@ module.exports = san.defineComponent({
             let lastMonthLength = (time.getDay() + 7 - firstDayOfWeek) % 7 + 1 // time.getDay() 0是星期天, 1是星期一 ...
             let lastMonthfirst = time.getDate() - (lastMonthLength - 1)
             for (let i = 0; i < lastMonthLength; i++) {
-                arr.push({ year, month: month - 1, day: lastMonthfirst + i })
+                const classes = ['last-month'].concat(getCellClasses(year, month - 1, lastMonthfirst + i))
+                arr.push({ year, month: month - 1, day: lastMonthfirst + i, classes })
             }
 
             time.setMonth(time.getMonth() + 2, 0) // 切换到这个月最后一天
             let curMonthLength = time.getDate()
             for (let i = 0; i < curMonthLength; i++) {
-                arr.push({ year, month, day: 1 + i })
+                const classes = ['cur-month'].concat(getCellClasses(year, month, i + 1))
+                arr.push({ year, month, day: 1 + i, classes })
             }
 
             time.setMonth(time.getMonth() + 1, 1) // 切换到下个月第一天
             let nextMonthLength = 42 - (lastMonthLength + curMonthLength)
             for (let i = 0; i < nextMonthLength; i++) {
-                arr.push({ year, month: month + 1, day: 1 + i })
+                const classes = ['next-month'].concat(getCellClasses(year, month + 1, i + 1))
+                arr.push({ year, month: month + 1, day: 1 + i, classes })
             }
 
             return arr
@@ -85,41 +115,11 @@ module.exports = san.defineComponent({
 
         this.fire('select', date)
     },
-    getCellClasses({ year, month, day }) {
-        let classes = []
-        let cellTime = new Date(year, month, day).getTime()
-        let today = new Date().setHours(0, 0, 0, 0)
-        let curTime = this.data.get('value') && new Date(this.data.get('value')).setHours(0, 0, 0, 0)
-        let startTime = this.data.get('startAt') && new Date(this.data.get('startAt')).setHours(0, 0, 0, 0)
-        let endTime = this.data.get('endAt') && new Date(this.data.get('endAt')).setHours(0, 0, 0, 0)
+    getDisabledClasses({ year, month, day }) {
+        const cellTime = new Date(year, month, day).getTime()
+        if (this.disabledDate(cellTime)) return 'disabled'
 
-        if (month < this.data.get('month')) {
-            classes.push('last-month')
-        } else if (month > this.data.get('month')) {
-            classes.push('next-month')
-        } else {
-            classes.push('cur-month')
-        }
-
-        if (cellTime === today) {
-            classes.push('today')
-        }
-
-        if (this.disabledDate(cellTime)) {
-            classes.push('disabled')
-        }
-
-        if (curTime) {
-            if (cellTime === curTime) {
-                classes.push('actived')
-            } else if (startTime && cellTime <= curTime) {
-                classes.push('inrange')
-            } else if (endTime && cellTime >= curTime) {
-                classes.push('inrange')
-            }
-        }
-
-        return classes
+        return ''
     },
     getCellTitle({ year, month, day }) {
         return formatDate(new Date(year, month, day), this.data.get('dateFormat'))
@@ -127,7 +127,7 @@ module.exports = san.defineComponent({
     disabledDate(date) {
         const time = new Date(date).getTime()
         const maxTime = new Date(date).setHours(23, 59, 59, 999)
-        const { notBefore, notAfter, disabledDays } = this.data.get()
-        return inBefore(maxTime, notBefore) || inAfter(time, notAfter) || inDisabledDays(time, disabledDays)
+        const { notBefore, notAfter, disabledDays, startAt, endAt } = this.data.get()
+        return inBefore(maxTime, notBefore, startAt) || inAfter(time, notAfter, endAt) || inDisabledDays(time, disabledDays)
     }
 })

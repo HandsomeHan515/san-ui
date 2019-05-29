@@ -86,6 +86,8 @@ module.exports = san.defineComponent({
                     type="{{type}}"
                     year='{{year}}'
                     month='{{month}}'
+                    start-at="{{startAt}}"
+                    end-at="{{endAt}}"
                     not-before="{{notBefore}}"
                     not-after="{{notAfter}}"
                     disabled-days="{{disabledDays}}"
@@ -115,14 +117,14 @@ module.exports = san.defineComponent({
         const _firstYear = Math.floor(_year / 10) * 10
 
         return {
-            panel: 'TIME',
+            panel: 'DATE',
             dates: [],
             year: _year,
             month: _month,
             firstYear: _firstYear,
             months,
             value: null,
-            type: 'time',
+            type: 'date',
             visible: false,
             minuteStep: 0
         }
@@ -141,31 +143,11 @@ module.exports = san.defineComponent({
         }
     },
     attached() {
-        this.watch('now', val => {
-            const _date = new Date(val)
-            const year = _date.getFullYear()
-            const month = _date.getMonth()
-            this.data.set('year', year)
-            this.data.set('month', month)
-        })
-
-        this.watch('value', val => {
-
-        })
-
-        if (this.data.get('visible')) {
-            this.updateNow(this.data.get('value'))
-        }
-
         this.watch('panel', val => {
             if (val === 'YEAR') {
                 this.data.set('firstYear', Math.floor(this.data.get('year') / 10) * 10)
             }
         })
-    },
-    updateNow(val) {
-        const now = val ? new Date(val) : new Date()
-        this.data.set('now', now)
     },
     changePanelYears(flag) {
         const firstYear = this.data.get('firstYear') + flag * 10
@@ -183,43 +165,28 @@ module.exports = san.defineComponent({
     },
     handleTimeHeader() {
         if (this.data.get('type') === 'time') return
+
         this.data.set('panel', 'DATE')
     },
     selectDate(date) {
-        // if (this.data.get('type') === 'datetime') {
-        //     let time = new Date(date)
-        //     if (isDateObject(this.data.get('value'))) {
-        //         time.setHours(
-        //             this.data.get('value').getHours(),
-        //             this.data.get('value').getMinutes(),
-        //             this.data.get('value').getSeconds()
-        //         )
-        //     }
-        //     this.selectTime(time)
-        //     return
-        // }
         this.fire('select-date', date)
     },
     changeYear(year) {
         const { month } = this.data.get()
-        this.updateNow(new Date(year, month))
+        this.data.set('year', year)
+        this.data.set('month', month)
     },
     changeMonth(month) {
         const { year } = this.data.get()
-        this.updateNow(new Date(year, month))
+        this.data.set('year', year)
+        this.data.set('month', month)
     },
     selectYear(year) {
         this.changeYear(year)
-        if (this.data.get('type') === 'year') {
-            return this.selectDate(new Date(this.data.get('now')))
-        }
         this.data.set('panel', 'MONTH')
     },
     selectMonth(month) {
         this.changeMonth(month)
-        if (this.data.get('type') === 'month') {
-            return this.selectDate(new Date(this.data.get('now')))
-        }
         this.data.set('panel', 'DATE')
     },
     selectTime(time) {

@@ -16,8 +16,6 @@ $css-prefix-icon: $css-prefix + 'icon';
 $css-prefix-input: $css-prefix + 'input';
 
 .#{$css-prefix-picker} {
-  margin-left: 500px;
-  margin-top: 300px;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   position: relative;
@@ -34,44 +32,17 @@ $css-prefix-input: $css-prefix + 'input';
 }
 
 .#{$css-prefix-picker}-popup {
-  max-height: none;
+  position: absolute;
+  z-index: 1000;
   background-color: $white;
-
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
-  border-radius: 4px;
-  .#{$css-prefix-picker}-popup-content {
-    display: flex;
-    flex-direction: row;
-  }
+  border-radius:4px;
+  border: 1px solid $Border;
 }
 
 .#{$css-prefix-range}-wrapper {
-  width: 248px * 2;
+  width: 253px * 2;
   overflow: hidden;
-}
-
-.#{$css-prefix-shortcuts}-wrapper {
-  padding-top: 10px;
-  width: 93px;
-  text-align: left;
-  background-color: $Background;
-  font-size: 18px;
-  .#{$css-prefix-shortcuts} {
-    display: block;
-    line-height: 24px;
-    background: none;
-    outline: none;
-    border: 0;
-    color: inherit;
-    margin: 0;
-    margin-left: 10px;
-    padding: 0;
-    white-space: nowrap;
-    cursor: pointer;
-    &:hover {
-      color: mix(#fff, $Primary, 20%);
-    }
-  }
 }
 
 .#{$css-prefix-picker}-footer {
@@ -79,20 +50,19 @@ $css-prefix-input: $css-prefix + 'input';
   clear: both;
   text-align: right;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
-  .#{$css-prefix-picker}-datetime {
+  span {
     color: $Primary;
     line-height: 24px;
     font-size: 12px;
-    float: left;
-    margin-left: 12px;
+    margin-right: 12px;
   }
 }
 
 .#{$css-prefix-calendar} {
-  float: left;
+  display: inline-block;
   color: $Sub;
   padding: 6px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid #fffdff;
 
   .#{$css-prefix-calendar}-header {
     padding: 0 4px;

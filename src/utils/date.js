@@ -1,5 +1,9 @@
 const fecha = require('./fecha')
 
+function isPlainObject(obj) {
+    return Object.prototype.toString.call(obj) === '[object Object]'
+}
+
 function formatDate(date, format) {
     try {
         return fecha.format(new Date(date), format)
@@ -27,6 +31,19 @@ function isValidDate(date) {
     return !isNaN(new Date(date).getTime())
 }
 
+function dateEqual(a, b) {
+    return isDateObject(a)
+        && isDateObject(b)
+        && a.getTime() === b.getTime()
+}
+
+function rangeEqual(a, b) {
+    return Array.isArray(a)
+        && Array.isArray(b)
+        && a.length === b.length
+        && a.every((item, index) => dateEqual(item, b[index]))
+}
+
 const transformDate = {
     date: {
         value2date: val => isValidDate(val) ? new Date(val) : null,
@@ -42,10 +59,38 @@ const transformDate = {
     }
 }
 
+const transformRange = {
+    date: {
+        value2date: val => isValidRange(val) ? [new Date(val[0]), new Date(val[1])] : [null, null],
+        date2value: date => date
+    },
+    timestamp: {
+        value2date: val => isValidRange(val) ? [new Date(val[0]), new Date(val[1])] : [null, null],
+        date2value: date => date.map(transformDate.timestamp.date2value)
+    },
+    formatdate: {
+        value2date: (val, format) => {
+            if (Array.isArray(val) && val.length === 2) {
+                const start = parseDate(val[0], format)
+                const end = parseDate(val[1], format)
+                if (start && end && end >= start) {
+                    return [start, end]
+                }
+            }
+            return [null, null]
+        },
+        date2value: (date, format) => date.map(val => transformDate.formatdate.date2value(val, format))
+    }
+}
+
 module.exports = {
+    isPlainObject,
     formatDate,
     parseDate,
     isDateObject,
     isValidDate,
-    transformDate
+    dateEqual,
+    rangeEqual,
+    transformDate,
+    transformRange
 }

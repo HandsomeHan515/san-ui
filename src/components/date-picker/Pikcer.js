@@ -1,7 +1,7 @@
 const san = require('san')
 const Panel = require('./panel/panel')
 
-const { transformDate, isValidDate } = require('../../utils/date')
+const { transformDate, formatDate, transformRange, dateEqual, rangeEqual } = require('../../utils/date')
 const { isString } = require('@/utils')
 
 module.exports = san.defineComponent({
@@ -26,9 +26,10 @@ module.exports = san.defineComponent({
             </div>
             <div class='b-datepicker-popup' s-if='popupVisible'>
                 <b-panel
+                    s-if="!range"
                     type="{{innerType}}"
                     date-format="{{innerDateFormat}}"
-                    value="{{value}}"
+                    value="{{curVal}}"
                     not-before="{{notBefore}}"
                     not-after="{{notAfter}}"
                     disabled-days="{{disabledDays}}"
@@ -36,11 +37,39 @@ module.exports = san.defineComponent({
                     on-select-date="selectDate"
                     on-select-time="selectTime">
                 </b-panel>
-            </div>
-            <div class="b-datepicker-footer">
-                <b-button on-click="confirmDate">
-                    确定
-                </b-button>
+                <div s-else class="b-range-wrapper">
+                    <b-panel
+                        type="{{innerType}}"
+                        date-format="{{innerDateFormat}}"
+                        value="{{curVal[0]}}"
+                        start-at="{{null}}"
+                        end-at="{{curVal[1]}}"
+                        not-before="{{notBefore}}"
+                        not-after="{{notAfter}}"
+                        disabled-days="{{disabledDays}}"
+                        visible="{{popupVisible}}"
+                        on-select-date="selectStartDate"
+                        on-select-time="selectTime">
+                    </b-panel>
+                    <b-panel
+                        type="{{innerType}}"
+                        date-format="{{innerDateFormat}}"
+                        value="{{curVal[1]}}"
+                        start-at="{{curVal[0]}}"
+                        end-at="{{null}}"
+                        not-before="{{notBefore}}"
+                        not-after="{{notAfter}}"
+                        disabled-days="{{disabledDays}}"
+                        visible="{{popupVisible}}"
+                        on-select-date="selectEndDate"
+                        on-select-time="selectTime">
+                    </b-panel>
+                </div>
+                <div class="b-datepicker-footer">
+                    <span on-click="confirmDate">
+                        确定
+                    </span>
+                </div>
             </div>
         </div>
     `,
@@ -48,27 +77,37 @@ module.exports = san.defineComponent({
         'b-panel': Panel
     },
     initData() {
-        const _date = new Date().getTime()
-        const preDate = new Date(_date - (3600 * 1000 * 24))
-        const nextDate = new Date(_date + (3600 * 1000 * 24))
-
         return {
-            rili: new Date().getDate(),
             popupVisible: false,
             // props:
-            text: null,
             value: null,
             type: 'date',
             placeholder: '请选择日期',
-            format: 'HH:mm:ss',
-            // format: 'yyyy-MM-dd',
+            format: 'yyyy-MM-dd',
             disabled: false,
-            notBefore: new Date(),
-            // notAfter: nextDate,
-            // disabledDays: [preDate, new Date(), nextDate]
+            dateType: 'formatdate'
         }
     },
     computed: {
+        curVal() {
+            return this.data.get('range') ? [null, null] : null
+        },
+        transform() {
+            const obj = this.data.get('range') ? transformRange : transformDate
+            return obj[this.data.get('dateType')]
+        },
+        text() {
+            const transform = this.data.get('transform')
+            const value = this.data.get('value')
+            const format = this.data.get('format')
+            const range = this.data.get('range')
+            const date = transform.value2date(value, format)
+            if (!range) return date ? formatDate(date, format) : ''
+
+            return Array.isArray(date) && date.length === 2 && date[0] && date[1]
+                ? `${formatDate(date[0], format)} ~ ${formatDate(date[1], format)}`
+                : ''
+        },
         showClearIcon() {
             return !!this.data.get('value')
         },
@@ -85,19 +124,34 @@ module.exports = san.defineComponent({
             return String(this.data.get('type')).toLowerCase()
         }
     },
-    selectDate(date) {
-        const value = transformDate.formatdate.date2value(date, this.data.get('innnerDateFormat'))
+    stringify(date, format = this.data.get('format')) {
+        return formatDate(date, format)
+    },
+    updateDate(confirm = false) {
+        const { range, value, curVal, transform, format } = this.data.get()
+        const equal = range ? rangeEqual(value, curVal) : dateEqual(value, curVal)
+        if (equal) return false
+
+        const date = transform.date2value(curVal, format)
         this.data.set('value', date)
-        this.data.set('text', value)
-        this.data.set('popupVisible', false)
-        this.fire('change', value)
+        this.fire('change', date)
+        return true
+    },
+    selectDate(date) {
+        this.data.set('curVal', date)
+        this.updateDate()
+    },
+    selectStartDate(date) {
+        this.data.set('curVal[0]', date)
+        this.updateDate()
+    },
+    selectEndDate(date) {
+        this.data.set('curVal[1]', date)
+        this.updateDate()
     },
     selectTime(time, close) {
-        const value = transformDate.formatdate.date2value(time, this.data.get('innnerDateFormat'))
-        this.data.set('value', time)
-        this.data.set('text', value)
-        close && this.data.set('popupVisible', false)
-        this.fire('change', value)
+        this.data.set('curVal', time)
+        this.updateDate() && close && this.data.set('popupVisible', false)
     },
     handleFocus(e) {
         if (!this.data.get('popupVisible')) {
@@ -109,9 +163,11 @@ module.exports = san.defineComponent({
         this.fire('blur', e)
     },
     clearDate() {
-        this.data.set('value', null)
-        this.data.set('text', null)
+        const date = this.data.get('range') ? [null, null] : null
+        this.data.set('curVal', date)
+        this.data.set('value', date)
         this.data.set('popupVisible', false)
+        this.fire('clear')
     },
     confirmDate() {
         this.data.set('popupVisible', false)
