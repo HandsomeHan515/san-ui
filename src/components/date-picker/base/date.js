@@ -55,7 +55,6 @@ module.exports = san.defineComponent({
             //
             const year = this.data.get('year')
             const month = this.data.get('month')
-            console.log('year&month', year, month)
             const firstDayOfWeek = this.data.get('firstDayOfWeek')
 
             const getCellClasses = function (year, month, day) {

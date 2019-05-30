@@ -128,7 +128,7 @@ module.exports = san.defineComponent({
             firstYear: _firstYear,
             months,
             value: null,
-            type: 'date',
+            type: '',
             visible: false,
             minuteStep: 0
         }
@@ -154,12 +154,29 @@ module.exports = san.defineComponent({
         })
 
         if (this.data.get('visible')) {
-            const { value } = this.data.get()
+            const { value, type } = this.data.get()
             const date = new Date(value || new Date())
             const year = date.getFullYear()
             const month = date.getMonth()
             this.data.set('year', year, { force: true })
             this.data.set('month', month, { force: true })
+
+            switch (type) {
+                case 'year':
+                    this.data.set('panel', 'YEAR')
+                    break
+                case 'month':
+                    this.data.set('panel', 'MONTH')
+                    break
+                case 'date':
+                    this.data.set('panel', 'DATE')
+                    break
+                case 'time':
+                    this.data.set('panel', 'TIME')
+                    break
+                default:
+                    this.data.set('panel', 'DATE')
+            }
         }
     },
     changePanelYears(flag) {
@@ -196,10 +213,18 @@ module.exports = san.defineComponent({
     },
     selectYear(year) {
         this.changeYear(year)
+        const { type, month } = this.data.get()
+        if (type === 'year') {
+            return this.selectDate(new Date(year, month))
+        }
         this.data.set('panel', 'MONTH')
     },
     selectMonth(month) {
         this.changeMonth(month)
+        const { type, year } = this.data.get()
+        if (type === 'month') {
+            return this.selectDate(new Date(year, month))
+        }
         this.data.set('panel', 'DATE')
     },
     selectTime(time) {

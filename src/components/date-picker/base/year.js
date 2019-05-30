@@ -5,18 +5,13 @@ module.exports = san.defineComponent({
     template: `
         <div class='b-panel b-panel-year'>
             <span
-                class="cell {{ curYear === startYear + i ? 'actived' : '' }} {{ isDisabled(startYear + i) ? 'disabled' : '' }}"
-                s-for="item, i in list"
-                on-click='selectYear(startYear + i)'>
-                {{ startYear + i }}
+                class="cell {{item.classes}}"
+                s-for="item in years"
+                on-click='selectYear(item)'>
+                {{ item.year }}
             </span>
         </div>
     `,
-    initData() {
-        return {
-            list: new Array(10)
-        }
-    },
     computed: {
         startYear() {
             return Math.floor(this.data.get('firstYear') / 10) * 10
@@ -24,24 +19,44 @@ module.exports = san.defineComponent({
         curYear() {
             const value = this.data.get('value')
             return value && new Date(value).getFullYear()
+        },
+        years() { // [{ year: 2019, classes: ['actived', 'disabled'] }, ...]
+            const startYear = this.data.get('startYear')
+            const curYear = this.data.get('curYear')
+            const notBefore = this.data.get('notBefore')
+            const notAfter = this.data.get('notAfter')
+            const type = this.data.get('type')
+            const disabledDays = this.data.get('disabledDays')
+            const startAt = this.data.get('startAt')
+            const endAt = this.data.get('endAt')
+            let arr = []
+            for (let i = 0; i < 10; i++) {
+                const year = startYear + i
+                let classes = []
+                if (curYear === year) {
+                    classes.push('actived')
+                }
+                const time = new Date(year, 0).getTime()
+                const maxTime = new Date(year + 1, 0).getTime() - 1
+                if (
+                    inBefore(maxTime, notBefore, startAt)
+                    || inAfter(time, notAfter, endAt)
+                    || (type === 'year' && inDisabledDays(time, disabledDays))
+                ) {
+                    classes.push('disabled')
+                }
+
+                arr.push({ year, classes })
+            }
+
+            return arr
         }
     },
-    isDisabled(year) {
-        return !!this.disabledYear(year)
-    },
-    selectYear(year) {
-        if (this.disabledYear(year)) return
+    selectYear(item) {
+        if (item.classes.includes('disabled')) return
 
-        this.fire('select', year)
-    },
-    disabledYear(year) {
-        const time = new Date(year, 0).getTime()
-        const maxTime = new Date(year + 1, 0).getTime() - 1
-        const { notBefore, notAfter, disabledDays, type, startAt, endAt } = this.data.get()
-        return inBefore(maxTime, notBefore, startAt)
-            || inAfter(time, notAfter, endAt)
-            || (type == 'year' && inDisabledDays(time, disabledDays))
-    },
+        this.fire('select', item.year)
+    }
 })
 
 /**

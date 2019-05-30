@@ -14,7 +14,7 @@ module.exports = san.defineComponent({
                     autocomplete="off"
                     value="{{text}}"
                     disabled="{{disabled}}"
-                    placeholder="{{innerPlaceholder}}"
+                    placeholder="{{placeholder}}"
                     on-focus="handleFocus"
                     on-blur="handleBlur">
                 <span
@@ -116,16 +116,9 @@ module.exports = san.defineComponent({
             if (format) return format
             return 'yyyy-MM-dd'
         },
-        innerPlaceholder() {
-            if (!isString(this.data.get('placeholder'))) return
-            return this.data.get('placeholder')
-        },
         innerType() {
             return String(this.data.get('type')).toLowerCase()
         }
-    },
-    stringify(date, format = this.data.get('format')) {
-        return formatDate(date, format)
     },
     updateDate(confirm = false) {
         const { range, value, curVal, transform, format } = this.data.get()

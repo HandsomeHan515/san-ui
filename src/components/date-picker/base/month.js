@@ -5,16 +5,15 @@ module.exports = san.defineComponent({
     template: `
         <div class='b-panel b-panel-month'>
             <span
-                class="cell {{ curYear === year && curMonth === i ? 'actived' : '' }} {{ isDisabled(i) ? 'disabled' : '' }}"
-                s-for="month, i in months"
-                on-click='selectMonth(i)'>
-                {{ month }}
+                class="cell {{ item.classes }}"
+                s-for="item, i in months"
+                on-click='selectMonth(item, i)'>
+                {{ item.month }}
             </span>
         </div>
     `,
     initData() {
         return {
-            months: months,
             // Props:
             value: null,
             year: new Date().getFullYear()
@@ -28,23 +27,45 @@ module.exports = san.defineComponent({
         curMonth() {
             const value = this.data.get('value')
             return value && new Date(value).getMonth()
+        },
+        months() {
+            const curYear = this.data.get('curYear')
+            const curMonth = this.data.get('curMonth')
+            const year = this.data.get('year')
+            const notBefore = this.data.get('notBefore')
+            const notAfter = this.data.get('notAfter')
+            const type = this.data.get('type')
+            const disabledDays = this.data.get('disabledDays')
+            const startAt = this.data.get('startAt')
+            const endAt = this.data.get('endAt')
+
+            let arr = []
+            months.forEach((month, i) => {
+                let classes = []
+
+                if (curYear === year && curMonth === i) {
+                    classes.push('actived')
+                }
+
+                const time = new Date(year, i).getTime()
+                const maxTime = new Date(year, i + 1).getTime() - 1
+                if (
+                    inBefore(maxTime, notBefore, startAt)
+                    || inAfter(time, notAfter, endAt)
+                    || (type === 'month' && inDisabledDays(time, disabledDays))
+                ) {
+                    classes.push('disabled')
+                }
+
+                arr.push({ month, classes })
+            })
+
+            return arr
         }
     },
-    selectMonth(month) {
-        if (this.disabledMonth(month)) return
+    selectMonth(item, i) {
+        if (item.classes.includes('disabled')) return
 
-        this.fire('select', month)
-    },
-    isDisabled(month) {
-        return !!this.disabledMonth(month)
-    },
-    disabledMonth(month) {
-        const { year } = this.data.get()
-        const time = new Date(year, month).getTime()
-        const maxTime = new Date(year, month + 1).getTime() - 1
-        const { notBefore, notAfter, disabledDays, type, startAt, endAt } = this.data.get()
-        return inBefore(maxTime, notBefore, startAt)
-            || inAfter(time, notAfter, endAt)
-            || (type == 'month' && inDisabledDays(time, disabledDays))
+        this.fire('select', i)
     }
 })
