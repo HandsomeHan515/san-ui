@@ -42,9 +42,9 @@ module.exports = san.defineComponent({
         const { year } = this.data.get()
         const time = new Date(year, month).getTime()
         const maxTime = new Date(year, month + 1).getTime() - 1
-        const { notBefore, notAfter, disabledDays, type } = this.data.get()
-        return inBefore(maxTime, notBefore)
-            || inAfter(time, notAfter)
+        const { notBefore, notAfter, disabledDays, type, startAt, endAt } = this.data.get()
+        return inBefore(maxTime, notBefore, startAt)
+            || inAfter(time, notAfter, endAt)
             || (type == 'month' && inDisabledDays(time, disabledDays))
     }
 })

@@ -67,6 +67,8 @@ module.exports = san.defineComponent({
                     first-year='{{firstYear}}'
                     not-before="{{notBefore}}"
                     not-after="{{notAfter}}"
+                    start-at="{{startAt}}"
+                    end-at="{{endAt}}"
                     disabled-days="{{disabledDays}}"
                     on-select="selectYear">
                 </b-table-year>
@@ -75,6 +77,8 @@ module.exports = san.defineComponent({
                     value='{{value}}'
                     type="{{type}}"
                     year='{{year}}'
+                    start-at="{{startAt}}"
+                    end-at="{{endAt}}"
                     not-before="{{notBefore}}"
                     not-after="{{notAfter}}"
                     disabled-days="{{disabledDays}}"
@@ -148,6 +152,15 @@ module.exports = san.defineComponent({
                 this.data.set('firstYear', Math.floor(this.data.get('year') / 10) * 10)
             }
         })
+
+        if (this.data.get('visible')) {
+            const { value } = this.data.get()
+            const date = new Date(value || new Date())
+            const year = date.getFullYear()
+            const month = date.getMonth()
+            this.data.set('year', year, { force: true })
+            this.data.set('month', month, { force: true })
+        }
     },
     changePanelYears(flag) {
         const firstYear = this.data.get('firstYear') + flag * 10
