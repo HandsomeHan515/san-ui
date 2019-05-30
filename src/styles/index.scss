@@ -48,13 +48,26 @@ $css-prefix-input: $css-prefix + 'input';
 .#{$css-prefix-picker}-footer {
   padding: 4px;
   clear: both;
-  text-align: right;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   span {
+    float: right;
+    cursor: pointer;
     color: $Primary;
     line-height: 24px;
     font-size: 12px;
     margin-right: 12px;
+  }
+  a {
+    float: left;
+    cursor: pointer;
+    color: $Primary;
+    line-height: 24px;
+    font-size: 12px;
+    margin-left: 12px;
+    &.disabled {
+      cursor: not-allowed;
+      color: $bgFont;
+    }
   }
 }
 

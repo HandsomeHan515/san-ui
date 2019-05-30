@@ -39,6 +39,7 @@ module.exports = san.defineComponent({
                 </b-panel>
                 <div s-else class="b-range-wrapper">
                     <b-panel
+                        s-ref="left-panel"
                         type="{{innerType}}"
                         date-format="{{innerDateFormat}}"
                         value="{{curVal[0]}}"
@@ -49,9 +50,10 @@ module.exports = san.defineComponent({
                         disabled-days="{{disabledDays}}"
                         visible="{{popupVisible}}"
                         on-select-date="selectStartDate"
-                        on-select-time="selectTime">
+                        on-select-time="selectStartTime">
                     </b-panel>
                     <b-panel
+                        s-ref="right-panel"
                         type="{{innerType}}"
                         date-format="{{innerDateFormat}}"
                         value="{{curVal[1]}}"
@@ -62,10 +64,16 @@ module.exports = san.defineComponent({
                         disabled-days="{{disabledDays}}"
                         visible="{{popupVisible}}"
                         on-select-date="selectEndDate"
-                        on-select-time="selectTime">
+                        on-select-time="selectEndTime">
                     </b-panel>
                 </div>
                 <div class="b-datepicker-footer">
+                    <a 
+                        s-if="type === 'datetime'" 
+                        class="{{ showTimePanel ? '' : 'disabled' }}"
+                        on-click="handleClickTime">
+                        选择时间
+                    </a>
                     <span on-click="confirmDate">
                         确定
                     </span>
@@ -118,6 +126,10 @@ module.exports = san.defineComponent({
         },
         innerType() {
             return String(this.data.get('type')).toLowerCase()
+        },
+        showTimePanel() {
+            const date = this.data.get('curVal')
+            return Array.isArray(date) && date.length === 2 && date[0] && date[1]
         }
     },
     updateDate(confirm = false) {
@@ -142,9 +154,15 @@ module.exports = san.defineComponent({
         this.data.set('curVal[1]', date)
         this.updateDate()
     },
-    selectTime(time, close) {
+    selectTime(time) {
         this.data.set('curVal', time)
-        this.updateDate() && close && this.data.set('popupVisible', false)
+        this.updateDate()
+    },
+    selectStartTime(time) {
+        this.selectStartDate(time)
+    },
+    selectEndTime(time) {
+        this.selectEndDate(time)
     },
     handleFocus(e) {
         if (!this.data.get('popupVisible')) {
@@ -164,5 +182,10 @@ module.exports = san.defineComponent({
     },
     confirmDate() {
         this.data.set('popupVisible', false)
+    },
+    handleClickTime() {
+        if (!this.data.get('showTimePanel')) return
+        this.ref('left-panel').parentChangePanel()
+        this.ref('right-panel').parentChangePanel()
     }
 })

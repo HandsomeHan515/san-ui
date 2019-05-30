@@ -199,6 +199,17 @@ module.exports = san.defineComponent({
         this.data.set('panel', 'DATE')
     },
     selectDate(date) {
+        const { type } = this.data.get()
+        if (type === 'datetime') {
+            const { value } = this.data.get()
+            let time = new Date(date)
+            if (isDateObject(value)) {
+                time.setHours(value.getHours(), value.getMinutes(), value.getSeconds())
+            }
+
+            return this.selectTime(time)
+        }
+
         this.fire('select-date', date)
     },
     changeYear(year) {
@@ -228,12 +239,15 @@ module.exports = san.defineComponent({
         this.data.set('panel', 'DATE')
     },
     selectTime(time) {
-        this.fire('select-time', time, false)
+        this.fire('select-time', time)
     },
     handleClickYear() {
         this.data.set('panel', 'YEAR')
     },
     handleClickMonth() {
         this.data.set('panel', 'MONTH')
+    },
+    parentChangePanel() {
+        this.data.set('panel', 'TIME')
     }
 })

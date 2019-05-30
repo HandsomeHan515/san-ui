@@ -357,13 +357,24 @@
 .b-datepicker-footer {
   padding: 4px;
   clear: both;
-  text-align: right;
   border-top: 1px solid rgba(0, 0, 0, 0.05); }
   .b-datepicker-footer span {
+    float: right;
+    cursor: pointer;
     color: #0079CC;
     line-height: 24px;
     font-size: 12px;
     margin-right: 12px; }
+  .b-datepicker-footer a {
+    float: left;
+    cursor: pointer;
+    color: #0079CC;
+    line-height: 24px;
+    font-size: 12px;
+    margin-left: 12px; }
+    .b-datepicker-footer a.disabled {
+      cursor: not-allowed;
+      color: #ccc; }
 
 .b-calendar {
   display: inline-block;

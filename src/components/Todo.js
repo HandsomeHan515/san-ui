@@ -20,6 +20,10 @@ module.exports = san.defineComponent({
                 <b-datepicker type='year' format='yyyy' range on-change="handleChangeYear"></b-datepicker>
                 <b-datepicker type='month' format='yyyy-MM' range on-change="handleChangeMonth"></b-datepicker>
             </div>
+
+            <div style="margin: 150px 300px;">
+                <b-datepicker type='datetime' range format='yyyy-MM-dd HH:mm:ss' on-change="handleChange"></b-datepicker>
+            </div>
         </div>
     `,
     initData() {

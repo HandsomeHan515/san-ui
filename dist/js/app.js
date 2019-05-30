@@ -12805,7 +12805,7 @@ var Button = __webpack_require__(/*! ./button/Button */ "./src/components/button
 var Datepicker = __webpack_require__(/*! ./date-picker/Pikcer */ "./src/components/date-picker/Pikcer.js");
 
 module.exports = san.defineComponent({
-  template: "\n        <div class='hello'>\n            <b-link to='/year'>\u5E74\u5EA6</b-link>\n            <b-link to='/month'>\u6708\u4EFD</b-link>\n            <b-link to='/date'>\u65E5\u5386</b-link>\n            <div style=\"margin-top: 30px;\">\n                <b-button type=\"success\">\u6210\u529F</b-button>\n                <b-button type=\"warning\">\u8B66\u544A</b-button>\n                <b-button type=\"info\">\u63D0\u793A</b-button>\n                <b-button type=\"error\">\u9519\u8BEF</b-button>\n            </div>\n            <div style=\"margin: 50px 300px;\">\n                <b-datepicker range on-change=\"handleChange\"></b-datepicker>\n                <b-datepicker type='year' format='yyyy' range on-change=\"handleChangeYear\"></b-datepicker>\n                <b-datepicker type='month' format='yyyy-MM' range on-change=\"handleChangeMonth\"></b-datepicker>\n            </div>\n        </div>\n    ",
+  template: "\n        <div class='hello'>\n            <b-link to='/year'>\u5E74\u5EA6</b-link>\n            <b-link to='/month'>\u6708\u4EFD</b-link>\n            <b-link to='/date'>\u65E5\u5386</b-link>\n            <div style=\"margin-top: 30px;\">\n                <b-button type=\"success\">\u6210\u529F</b-button>\n                <b-button type=\"warning\">\u8B66\u544A</b-button>\n                <b-button type=\"info\">\u63D0\u793A</b-button>\n                <b-button type=\"error\">\u9519\u8BEF</b-button>\n            </div>\n            <div style=\"margin: 50px 300px;\">\n                <b-datepicker range on-change=\"handleChange\"></b-datepicker>\n                <b-datepicker type='year' format='yyyy' range on-change=\"handleChangeYear\"></b-datepicker>\n                <b-datepicker type='month' format='yyyy-MM' range on-change=\"handleChangeMonth\"></b-datepicker>\n            </div>\n\n            <div style=\"margin: 150px 300px;\">\n                <b-datepicker type='datetime' range format='yyyy-MM-dd HH:mm:ss' on-change=\"handleChange\"></b-datepicker>\n            </div>\n        </div>\n    ",
   initData: function initData() {
     return {};
   },
@@ -12916,7 +12916,7 @@ var _require2 = __webpack_require__(/*! @/utils */ "./src/utils/index.js"),
     isString = _require2.isString;
 
 module.exports = san.defineComponent({
-  template: "\n        <div class='b-datepicker'>\n            <div class='b-input-wrapper'>\n                <input\n                    class=\"b-input\"\n                    type=\"text\"\n                    autocomplete=\"off\"\n                    value=\"{{text}}\"\n                    disabled=\"{{disabled}}\"\n                    placeholder=\"{{placeholder}}\"\n                    on-focus=\"handleFocus\"\n                    on-blur=\"handleBlur\">\n                <span\n                    s-if=\"showClearIcon\"\n                    class=\"b-input-append\"\n                    on-click=\"clearDate\">\n                    X\n                </span>\n            </div>\n            <div class='b-datepicker-popup' s-if='popupVisible'>\n                <b-panel\n                    s-if=\"!range\"\n                    type=\"{{innerType}}\"\n                    date-format=\"{{innerDateFormat}}\"\n                    value=\"{{curVal}}\"\n                    not-before=\"{{notBefore}}\"\n                    not-after=\"{{notAfter}}\"\n                    disabled-days=\"{{disabledDays}}\"\n                    visible=\"{{popupVisible}}\"\n                    on-select-date=\"selectDate\"\n                    on-select-time=\"selectTime\">\n                </b-panel>\n                <div s-else class=\"b-range-wrapper\">\n                    <b-panel\n                        type=\"{{innerType}}\"\n                        date-format=\"{{innerDateFormat}}\"\n                        value=\"{{curVal[0]}}\"\n                        start-at=\"{{null}}\"\n                        end-at=\"{{curVal[1]}}\"\n                        not-before=\"{{notBefore}}\"\n                        not-after=\"{{notAfter}}\"\n                        disabled-days=\"{{disabledDays}}\"\n                        visible=\"{{popupVisible}}\"\n                        on-select-date=\"selectStartDate\"\n                        on-select-time=\"selectTime\">\n                    </b-panel>\n                    <b-panel\n                        type=\"{{innerType}}\"\n                        date-format=\"{{innerDateFormat}}\"\n                        value=\"{{curVal[1]}}\"\n                        start-at=\"{{curVal[0]}}\"\n                        end-at=\"{{null}}\"\n                        not-before=\"{{notBefore}}\"\n                        not-after=\"{{notAfter}}\"\n                        disabled-days=\"{{disabledDays}}\"\n                        visible=\"{{popupVisible}}\"\n                        on-select-date=\"selectEndDate\"\n                        on-select-time=\"selectTime\">\n                    </b-panel>\n                </div>\n                <div class=\"b-datepicker-footer\">\n                    <span on-click=\"confirmDate\">\n                        \u786E\u5B9A\n                    </span>\n                </div>\n            </div>\n        </div>\n    ",
+  template: "\n        <div class='b-datepicker'>\n            <div class='b-input-wrapper'>\n                <input\n                    class=\"b-input\"\n                    type=\"text\"\n                    autocomplete=\"off\"\n                    value=\"{{text}}\"\n                    disabled=\"{{disabled}}\"\n                    placeholder=\"{{placeholder}}\"\n                    on-focus=\"handleFocus\"\n                    on-blur=\"handleBlur\">\n                <span\n                    s-if=\"showClearIcon\"\n                    class=\"b-input-append\"\n                    on-click=\"clearDate\">\n                    X\n                </span>\n            </div>\n            <div class='b-datepicker-popup' s-if='popupVisible'>\n                <b-panel\n                    s-if=\"!range\"\n                    type=\"{{innerType}}\"\n                    date-format=\"{{innerDateFormat}}\"\n                    value=\"{{curVal}}\"\n                    not-before=\"{{notBefore}}\"\n                    not-after=\"{{notAfter}}\"\n                    disabled-days=\"{{disabledDays}}\"\n                    visible=\"{{popupVisible}}\"\n                    on-select-date=\"selectDate\"\n                    on-select-time=\"selectTime\">\n                </b-panel>\n                <div s-else class=\"b-range-wrapper\">\n                    <b-panel\n                        s-ref=\"left-panel\"\n                        type=\"{{innerType}}\"\n                        date-format=\"{{innerDateFormat}}\"\n                        value=\"{{curVal[0]}}\"\n                        start-at=\"{{null}}\"\n                        end-at=\"{{curVal[1]}}\"\n                        not-before=\"{{notBefore}}\"\n                        not-after=\"{{notAfter}}\"\n                        disabled-days=\"{{disabledDays}}\"\n                        visible=\"{{popupVisible}}\"\n                        on-select-date=\"selectStartDate\"\n                        on-select-time=\"selectStartTime\">\n                    </b-panel>\n                    <b-panel\n                        s-ref=\"right-panel\"\n                        type=\"{{innerType}}\"\n                        date-format=\"{{innerDateFormat}}\"\n                        value=\"{{curVal[1]}}\"\n                        start-at=\"{{curVal[0]}}\"\n                        end-at=\"{{null}}\"\n                        not-before=\"{{notBefore}}\"\n                        not-after=\"{{notAfter}}\"\n                        disabled-days=\"{{disabledDays}}\"\n                        visible=\"{{popupVisible}}\"\n                        on-select-date=\"selectEndDate\"\n                        on-select-time=\"selectEndTime\">\n                    </b-panel>\n                </div>\n                <div class=\"b-datepicker-footer\">\n                    <a \n                        s-if=\"type === 'datetime'\" \n                        class=\"{{ showTimePanel ? '' : 'disabled' }}\"\n                        on-click=\"handleClickTime\">\n                        \u9009\u62E9\u65F6\u95F4\n                    </a>\n                    <span on-click=\"confirmDate\">\n                        \u786E\u5B9A\n                    </span>\n                </div>\n            </div>\n        </div>\n    ",
   components: {
     'b-panel': Panel
   },
@@ -12959,6 +12959,10 @@ module.exports = san.defineComponent({
     },
     innerType: function innerType() {
       return String(this.data.get('type')).toLowerCase();
+    },
+    showTimePanel: function showTimePanel() {
+      var date = this.data.get('curVal');
+      return Array.isArray(date) && date.length === 2 && date[0] && date[1];
     }
   },
   updateDate: function updateDate() {
@@ -12990,9 +12994,15 @@ module.exports = san.defineComponent({
     this.data.set('curVal[1]', date);
     this.updateDate();
   },
-  selectTime: function selectTime(time, close) {
+  selectTime: function selectTime(time) {
     this.data.set('curVal', time);
-    this.updateDate() && close && this.data.set('popupVisible', false);
+    this.updateDate();
+  },
+  selectStartTime: function selectStartTime(time) {
+    this.selectStartDate(time);
+  },
+  selectEndTime: function selectEndTime(time) {
+    this.selectEndDate(time);
   },
   handleFocus: function handleFocus(e) {
     if (!this.data.get('popupVisible')) {
@@ -13013,6 +13023,11 @@ module.exports = san.defineComponent({
   },
   confirmDate: function confirmDate() {
     this.data.set('popupVisible', false);
+  },
+  handleClickTime: function handleClickTime() {
+    if (!this.data.get('showTimePanel')) return;
+    this.ref('left-panel').parentChangePanel();
+    this.ref('right-panel').parentChangePanel();
   }
 });
 
@@ -13713,18 +13728,34 @@ module.exports = san.defineComponent({
     this.data.set('panel', 'DATE');
   },
   selectDate: function selectDate(date) {
+    var _this$data$get2 = this.data.get(),
+        type = _this$data$get2.type;
+
+    if (type === 'datetime') {
+      var _this$data$get3 = this.data.get(),
+          value = _this$data$get3.value;
+
+      var time = new Date(date);
+
+      if (isDateObject(value)) {
+        time.setHours(value.getHours(), value.getMinutes(), value.getSeconds());
+      }
+
+      return this.selectTime(time);
+    }
+
     this.fire('select-date', date);
   },
   changeYear: function changeYear(year) {
-    var _this$data$get2 = this.data.get(),
-        month = _this$data$get2.month;
+    var _this$data$get4 = this.data.get(),
+        month = _this$data$get4.month;
 
     this.data.set('year', year);
     this.data.set('month', month);
   },
   changeMonth: function changeMonth(month) {
-    var _this$data$get3 = this.data.get(),
-        year = _this$data$get3.year;
+    var _this$data$get5 = this.data.get(),
+        year = _this$data$get5.year;
 
     this.data.set('year', year);
     this.data.set('month', month);
@@ -13732,9 +13763,9 @@ module.exports = san.defineComponent({
   selectYear: function selectYear(year) {
     this.changeYear(year);
 
-    var _this$data$get4 = this.data.get(),
-        type = _this$data$get4.type,
-        month = _this$data$get4.month;
+    var _this$data$get6 = this.data.get(),
+        type = _this$data$get6.type,
+        month = _this$data$get6.month;
 
     if (type === 'year') {
       return this.selectDate(new Date(year, month));
@@ -13745,9 +13776,9 @@ module.exports = san.defineComponent({
   selectMonth: function selectMonth(month) {
     this.changeMonth(month);
 
-    var _this$data$get5 = this.data.get(),
-        type = _this$data$get5.type,
-        year = _this$data$get5.year;
+    var _this$data$get7 = this.data.get(),
+        type = _this$data$get7.type,
+        year = _this$data$get7.year;
 
     if (type === 'month') {
       return this.selectDate(new Date(year, month));
@@ -13756,13 +13787,16 @@ module.exports = san.defineComponent({
     this.data.set('panel', 'DATE');
   },
   selectTime: function selectTime(time) {
-    this.fire('select-time', time, false);
+    this.fire('select-time', time);
   },
   handleClickYear: function handleClickYear() {
     this.data.set('panel', 'YEAR');
   },
   handleClickMonth: function handleClickMonth() {
     this.data.set('panel', 'MONTH');
+  },
+  parentChangePanel: function parentChangePanel() {
+    this.data.set('panel', 'TIME');
   }
 });
 
